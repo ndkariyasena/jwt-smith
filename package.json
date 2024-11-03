@@ -17,7 +17,6 @@
   ],
   "author": "ndkariyasena",
   "license": "ISC",
-  "type": "module",
   "workspaces": [
     "package/core",
     "package/refresh-token"
