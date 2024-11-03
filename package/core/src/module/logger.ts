@@ -11,7 +11,7 @@ interface LoggerOptions {
   setPrefix: boolean
 }
 
-const LOGGER_PREFIX = '[JWT-Smith]';
+const LOGGER_PREFIX = '[JWT-Smith] ';
 
 let currentLogger: Logger = console;
 
@@ -39,16 +39,21 @@ export const getLogger = (): Logger => {
 };
 
 /**
+ * Format log messages. This function formats a given log message based on the logSettings configuration.
+ */
+export const logFormat = (message: string): string => {
+  return `${logSettings.setPrefix ? LOGGER_PREFIX : ''}${message}`;
+}
+
+/**
  * Logs a message at a specified level using the current logger.
  */
 export const log = (level: LogLevel, message: string, ...args: unknown[]): void => {
 	const logger = getLogger();
 
-	const logMessage = `${logSettings.setPrefix ? LOGGER_PREFIX : ''}${message}`;
-
 	if (logger[level]) {
-		logger[level](logMessage, ...args);
+		logger[level](logFormat(message), ...args);
 	} else {
-		console.error(`${LOGGER_PREFIX}Invalid log level: ${level}`);
+		console.error(logFormat(`Invalid log level: ${level}`));
 	}
 };
