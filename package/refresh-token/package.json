@@ -1,5 +1,5 @@
 {
-	"name": "refresh-token",
+	"name": "@jwt-auth-next/refresh-token",
 	"version": "1.0.0",
 	"main": "index.js",
 	"devDependencies": {},
