@@ -1,0 +1,38 @@
+{
+  "name": "jwt-auth-next",
+  "version": "1.0.0",
+  "description": "Enhanced JWT Authentication and Authorization Module",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "format": "prettier --ignore-unknown --write .",
+    "format:check": "prettier --check .",
+    "lint": "eslint .",
+    "prepare": "husky"
+  },
+  "keywords": [
+    "jwt",
+    "auth",
+    "jwt refresh"
+  ],
+  "author": "ndkariyasena",
+  "license": "ISC",
+  "workspaces": [
+    "package/core",
+    "package/refresh-token"
+  ],
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@types/eslint__js": "^8.42.3",
+    "eslint": "^9.13.0",
+    "husky": "^9.1.6",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.2.10",
+    "prettier": "3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.12.2"
+  },
+  "lint-staged": {
+    "*.{js,css,md}": "prettier --ignore-unknown --write"
+  }
+}

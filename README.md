@@ -1,2 +1,3 @@
-# jwt-auth-next
-Enhanced JWT Authentication and Authorisation Module
+# jwt-smith
+
+Enhanced JWT Authentication and Authorization Module
