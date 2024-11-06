@@ -1,9 +1,14 @@
 name: Unit Tests Runner
 
-on: [pull_request]
+on:
+  pull_request:
+    branches:
+      - main
+      - 'releases/**'
 
 jobs:
   unit-tests:
+    name: Unit Tests
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,4 +28,7 @@ jobs:
 
       - name: Tests starting
         run: npm test
+
+      # - name: Test coverage Check
+      #   run: npm test --coverage
 
