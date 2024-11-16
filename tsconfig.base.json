@@ -25,5 +25,13 @@
     "module": "NodeNext",
     "sourceMap": true,
     "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "tsBuildInfoFile": "dist/tsconfig.lib.tsbuildinfo",
+    "incremental": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "pretty": true,
+    "skipDefaultLibCheck": false,
   }
 }

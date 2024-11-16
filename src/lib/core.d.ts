@@ -1,6 +1,6 @@
 import { JsonWebKeyInput, KeyObject, PrivateKeyInput, PublicKeyInput } from 'node:crypto';
 
-export { JsonWebTokenError, TokenExpiredError, NotBeforeError } from 'jsonwebtoken'
+export { JsonWebTokenError, TokenExpiredError, NotBeforeError } from 'jsonwebtoken';
 
 export type Secret =
 | string
