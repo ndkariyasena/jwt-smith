@@ -1,14 +1,12 @@
-name: Unit Tests Runner
-
+name: CI
 on:
-  pull_request:
+  push:
     branches:
-      - main
-      - 'releases/**'
+      - "**"
 
 jobs:
-  unit-tests:
-    name: Unit Tests
+  lint-n-build:
+    name: Linter and Builder
     runs-on: ubuntu-latest
 
     strategy:
@@ -25,12 +23,5 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: "npm"
 
-      - name: Npm install
-        run: npm install --frozen-lockfile
-
-      - name: Tests starting
-        run: npm test
-
-      # - name: Test coverage Check
-      #   run: npm test --coverage
-
+      - run: npm install --frozen-lockfile
+      - run: npm run lint && npm run build

@@ -11,7 +11,7 @@ interface LoggerOptions {
   setPrefix: boolean
 }
 
-const LOGGER_PREFIX = '[JWT-Smith] ';
+const LOGGER_PREFIX = '[JWTx] ';
 
 let currentLogger: Logger = console;
 
