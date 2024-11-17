@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from "express";
-import { publicKey } from "src/lib/core";
+import { NextFunction, Request, Response } from 'express';
+import { publicKey } from 'src/lib/core';
 
-import { log } from "src/lib/logger";
-import { verify } from "src/lib/verify-token";
+import { log } from 'src/lib/logger';
+import { verify } from 'src/lib/verify-token';
 
 
 const authenticateJwtMiddleware = async (req: Request, res: Response, next: NextFunction) => {
@@ -18,22 +18,30 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
       return res.sendStatus(401);
     }
 
-    let tokenDecoded;
+    let decodedTokenPayload;
+    let tokenValue;
 
     if (authHeader && authHeader.split(' ')[1]) {
-      const token = authHeader.split(' ')[1] as string;
+      tokenValue = authHeader.split(' ')[1] as string;
 
-      tokenDecoded = await verify({
-        token,
+    } else {
+      tokenValue = accessToken;
+    }
+
+    if (tokenValue) {
+      decodedTokenPayload = await verify({
+        token: tokenValue,
         secret: publicKey,
       });
 
-      console.log(tokenDecoded)
+      console.log(decodedTokenPayload)
+    } else {
+      throw new Error('Token not found.');
     }
 
     return next()
   } catch (error) {
-    log('error', 'Error occurred when authenticating the JST token.', error);
+    log('error', 'Error occurred while authenticating the JST token.', error);
     return res.sendStatus(401);
   }
 };
