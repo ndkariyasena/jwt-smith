@@ -1,5 +1,5 @@
 import DefaultTokenStorage from 'src/module/token-storage';
-import { TokenStorage, SessionStorage, RefreshTokenHandlerOptions } from './core.d';
+import { TokenStorage, SessionStorage, RefreshTokenHandlerOptions } from './custom';
 import DefaultSessionStorage from 'src/module/session-storage';
 import { log } from './logger';
 

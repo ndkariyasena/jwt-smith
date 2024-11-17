@@ -2,23 +2,7 @@ import jsonwebtoken, { Jwt, JwtPayload } from 'jsonwebtoken';
 import Joi from 'joi';
 import { log, logFormat } from './logger';
 
-import { Algorithm, PublicKey, Secret } from './core';
-
-interface VerifyTokenOptions {
-	algorithms?: Algorithm[] | undefined;
-	audience?: string | RegExp | (string | RegExp)[] | undefined;
-	clockTimestamp?: number | undefined;
-	clockTolerance?: number | undefined;
-	complete?: boolean | undefined;
-	issuer?: string | string[] | undefined;
-	ignoreExpiration?: boolean | undefined;
-	ignoreNotBefore?: boolean | undefined;
-	jwtid?: string | undefined;
-	nonce?: string | undefined;
-	subject?: string | undefined;
-	maxAge?: string | number | undefined;
-	allowInvalidAsymmetricKeyTypes?: boolean | undefined;
-}
+import { VerifyTokenOptions, PublicKey, Secret } from './custom';
 
 interface VerifyTokenParams {
 	token: string;
@@ -83,18 +67,14 @@ export const verify = (parameters: VerifyTokenParams): Promise<string | Jwt | Jw
 	});
 };
 
-export const setDefaultVerifyOptions = (options: VerifyTokenOptions): Promise<boolean> => {
-	return new Promise((resolve, reject) => {
-		const { error, warning, value } = verifyTokenOptionsSchema.validate(options);
+export const setDefaultVerifyOptions = (options: VerifyTokenOptions): void => {
+	const { error, warning, value } = verifyTokenOptionsSchema.validate(options);
 
-		if (error) {
-			reject(logFormat(`Parameter Validation Error: ${error.message}`));
-		} else if (warning) {
-			log('warn', 'Parameter Validation Warning:', { warning_details: warning });
-		}
+	if (error) {
+		throw new Error(logFormat(`Parameter Validation Error: ${error.message}`));
+	} else if (warning) {
+		log('warn', 'Parameter Validation Warning:', { warning_details: warning });
+	}
 
-		defaultVerifyOptions = value;
-
-		resolve(true);
-	});
+	defaultVerifyOptions = value;
 };

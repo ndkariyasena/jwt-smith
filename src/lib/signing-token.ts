@@ -2,24 +2,7 @@ import jsonwebtoken, { JwtHeader } from 'jsonwebtoken';
 import Joi from 'joi';
 
 import { log, logFormat } from './logger';
-import { Algorithm, PrivateKey, Secret } from './core';
-
-interface SignTokenOptions {
-	algorithm?: Algorithm | undefined;
-	keyid?: string | undefined;
-	expiresIn?: string | number;
-	notBefore?: string | number | undefined;
-	audience?: string | string[] | undefined;
-	subject?: string | undefined;
-	issuer?: string | undefined;
-	jwtid?: string | undefined;
-	mutatePayload?: boolean | undefined;
-	noTimestamp?: boolean | undefined;
-	header?: JwtHeader | undefined;
-	encoding?: string | undefined;
-	allowInsecureKeySizes?: boolean | undefined;
-	allowInvalidAsymmetricKeyTypes?: boolean | undefined;
-}
+import { Algorithm, PrivateKey, Secret, SignTokenOptions } from './custom';
 
 interface SignTokenParams {
 	payload: string | Buffer | object;
@@ -92,18 +75,14 @@ export const sign = (parameters: SignTokenParams): Promise<string | undefined> =
 	});
 };
 
-export const setDefaultSignOptions = (options: SignTokenOptions): Promise<boolean> => {
-	return new Promise((resolve, reject) => {
-		const { error, warning, value } = signTokenOptionsSchema.validate(options);
+export const setDefaultSignOptions = (options: SignTokenOptions): void => {
+	const { error, warning, value } = signTokenOptionsSchema.validate(options);
 
-		if (error) {
-			reject(logFormat(`Parameter Validation Error: ${error.message}`));
-		} else if (warning) {
-			log('warn', 'Parameter Validation Warning:', { warning_details: warning });
-		}
+	if (error) {
+		throw new Error(logFormat(`Parameter Validation Error: ${error.message}`));
+	} else if (warning) {
+		log('warn', 'Parameter Validation Warning:', { warning_details: warning });
+	}
 
-		defaultSignOptions = value;
-
-		resolve(true);
-	});
+	defaultSignOptions = value;
 };

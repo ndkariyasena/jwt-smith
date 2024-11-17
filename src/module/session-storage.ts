@@ -1,4 +1,4 @@
-import { SessionStorage, Session } from "src/lib/core";
+import { SessionStorage, Session } from "src/lib/custom";
 
 export default class DefaultSessionStorage implements SessionStorage {
   private sessions = new Map<string, Session>();

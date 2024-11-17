@@ -1,4 +1,4 @@
-import { TokenStorage } from "src/lib/core.d";
+import { TokenStorage } from "src/lib/custom";
 
 export default class DefaultTokenStorage implements TokenStorage {
   private tokens = new Map<string, { token: string[]; refreshToken: string[] }>();
