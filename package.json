@@ -1,6 +1,6 @@
 {
-  "name": "jwt-auth-next",
-  "version": "0.0.1",
+  "name": "jwt-smith",
+  "version": "0.0.2",
   "description": "Enhanced JWT Authentication and Authorization Module",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -51,5 +51,11 @@
   },
   "lint-staged": {
     "*.{js,css,md}": "prettier --ignore-unknown --write"
+  },
+  "tsup": {
+    "entry": ["src/index.ts", "!playground/**"],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true
   }
 }
