@@ -1,0 +1,35 @@
+version: '3'
+
+name: jwt-smith-playground
+
+services:
+  jwt-smith-db:
+    image: 'postgres:latest'
+    container_name: 'jwt-smith-db'
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    networks:
+      - postgres-network
+    volumes:
+      - ${PWD}/volumes/db-data/:/var/lib/postgresql/data/
+      # - ${PWD}/volumes/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  jwt-smith-admin:
+    image: dpage/pgadmin4
+    container_name: 'jwt-smith-admin'
+    ports:
+      - 9000:80
+    env_file:
+      - .env
+    depends_on:
+      - jwt-smith-db
+    networks:
+      - postgres-network
+    volumes:
+      - ${PWD}/volumes/pgadmin-data/:/var/lib/pgadmin/
+
+networks:
+  postgres-network:
+    driver: bridge

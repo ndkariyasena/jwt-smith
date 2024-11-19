@@ -1,28 +1,36 @@
 {
-  "name": "playground",
-  "version": "1.0.0",
-  "main": "index.js",
-  "scripts": {
-    "dev": "nodemon src/index.ts"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
-  "devDependencies": {
-    "@types/body-parser": "^1.19.5",
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.9.0",
-    "nodemon": "^3.1.7",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
-  },
-  "dependencies": {
-    "body-parser": "^1.20.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.21.1",
-    "jwt-smith": "^0.0.2"
-  }
+	"name": "playground",
+	"version": "1.0.0",
+	"main": "index.js",
+	"scripts": {
+		"dev": "nodemon src/index.ts",
+		"typeorm": "typeorm-ts-node-commonjs",
+		"migration": " npm run typeorm migration:run -- -d ./src/db/connector.ts",
+		"migration:generate": "typeorm-ts-node-commonjs migration:generate -d ./src/db/connector.ts"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"description": "",
+	"devDependencies": {
+		"@types/bcrypt": "^5.0.2",
+		"@types/body-parser": "^1.19.5",
+		"@types/cors": "^2.8.17",
+		"@types/express": "^5.0.0",
+		"@types/node": "^22.9.0",
+		"nodemon": "^3.1.7",
+		"ts-node": "^10.9.2",
+		"typescript": "^5.6.3"
+	},
+	"dependencies": {
+		"bcrypt": "^5.1.1",
+		"body-parser": "^1.20.3",
+		"cors": "^2.8.5",
+		"dotenv": "^16.4.5",
+		"express": "^4.21.1",
+		"jwt-smith": "^0.0.2",
+		"pg": "^8.13.1",
+		"reflect-metadata": "^0.2.2",
+		"typeorm": "^0.3.20"
+	}
 }

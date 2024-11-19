@@ -1,13 +1,12 @@
+import 'dotenv/config';
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import { configure } from 'jwt-smith';
 
-
-import 'dotenv/config'
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import { configure } from "jwt-smith"
-
-import userRouters from "./routes/user";
-import authRouters from "./routes/auth";
+import { AppDataSource } from './db';
+import userRouters from './routes/user';
+import authRouters from './routes/auth';
 
 const PORT = parseInt(process.env.APP_PORT || '3000', 10);
 const HOST = process.env.APP_HOST || 'localhost';
@@ -20,21 +19,28 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 configure({
-  signOptions: {
-    algorithm: 'HS256'
-  }
-})
+	signOptions: {
+		algorithm: 'HS256',
+	},
+});
 
-app.use("/user", userRouters);
-app.use("/auth", authRouters);
+app.use('/user', userRouters);
+app.use('/auth', authRouters);
 /* Routes END */
 
 /* Server start */
-const server = app.listen(PORT, HOST);
+AppDataSource.initialize()
+	.then(async () => {
+		const server = app.listen(PORT, HOST);
 
-server.on("listening", (error: unknown): void => {
-  if (error) console.error("*** Server start failed! *** ", error);
-  else console.info(`\n/------------/\nServer start running on http://${HOST}:${PORT}\n/------------/\n`);
-});
+		server.on('listening', (error: unknown): void => {
+			if (error) console.error('*** Server start failed! *** ', error);
+			else console.info(`\n/------------/\nServer start running on http://${HOST}:${PORT}\n/------------/\n`);
+		});
 
-server.on("error", (error: unknown): void => console.error("*** Server failing! *** ", error));
+		server.on('error', (error: unknown): void => console.error('*** Server failing! *** ', error));
+	})
+	.catch((error) => {
+		console.error('Could not initialize the database connection!');
+		console.error(error);
+	});
