@@ -38,8 +38,8 @@ services:
       - '4873:4873'
     volumes:
       - ./config:/verdaccio/conf
-      - storage:/verdaccio/storage
-      - plugins:/verdaccio/plugins
+      - ${PWD}/volumes/storage:/verdaccio/storage
+      - ${PWD}/volumes/plugins:/verdaccio/plugins
 
 networks:
   postgres-network:
