@@ -11,6 +11,14 @@ export const signUp = async (req: Request, res: Response) => {
 	const user = req.body;
 	const userId = insertUser.next(user).value;
 
+	res.send(`Sign In Complete for the user: ${userId}`);
+};
+
+export const signIn = async (req: Request, res: Response) => {
+	console.log('---- signIn');
+	console.log(req.body);
+	const user = req.body;
+
 	const tokenPayload = {
 		payload: {
 			user: {
@@ -30,19 +38,7 @@ export const signUp = async (req: Request, res: Response) => {
 		httpOnly: true,
 	});
 
-	res.send(`Sign In Complete for the user: ${userId}`);
-};
-
-export const signIn = async (req: Request, res: Response) => {
-	console.log('---- signIn');
-	console.log(req.body);
-	const userId = insertUser.next({
-		email: '1',
-		password: '123',
-		name: '234',
-	}).value;
-
-	res.send(`Sign In Complete for the user: ${userId}`);
+	res.send('Sign In Complete');
 };
 
 export const signOut = async (req: Request, res: Response) => {
