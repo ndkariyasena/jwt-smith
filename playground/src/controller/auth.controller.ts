@@ -17,7 +17,7 @@ export const signUp = async (req: Request, res: Response) => {
 				name: user.name,
 			},
 		},
-		secret: process.env.ACCESS_TOKEN_SECRET || 'test',
+		secret: process.env.ACCESS_TOKEN_SECRET || '',
 		options: {
 			expiresIn: '1m',
 		},

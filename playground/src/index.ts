@@ -11,7 +11,6 @@ import authRouters from './routes/auth';
 const PORT = parseInt(process.env.APP_PORT || '3000', 10);
 const HOST = process.env.APP_HOST || 'localhost';
 
-// Create Express server
 const app = express();
 
 app.use(cors());

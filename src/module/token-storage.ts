@@ -1,36 +1,46 @@
-import { TokenStorage } from "src/lib/custom";
+import { TokenStorage } from 'src/lib/custom';
+
+interface tokenEntity {
+	token?: string[];
+	refreshToken?: string[];
+}
 
 export default class DefaultTokenStorage implements TokenStorage {
-  private tokens = new Map<string, { token: string[]; refreshToken: string[] }>();
+	private tokens = new Map<string, tokenEntity>();
 
-  async getToken(userId: string): Promise<string[] | null> {
-    return this.tokens.get(userId)?.token || null;
-  }
+	async saveToken(userId: string, tokenOrRefreshToken: string, refreshToken?: string): Promise<void> {
+		const existingData = this.tokens.get(userId) || { token: [], refreshToken: [] };
+		let update = {};
 
-  async getRefreshToken(userId: string): Promise<string[] | null> {
-    return this.tokens.get(userId)?.refreshToken || null;
-  }
+		if (refreshToken) {
+			update = {
+				token: [...(existingData.token || []), tokenOrRefreshToken],
+				refreshToken: [...(existingData.refreshToken || []), refreshToken],
+			};
+		} else if (existingData.refreshToken?.includes(tokenOrRefreshToken)) {
+			update = {
+				...existingData,
+				refreshToken: [...(existingData.refreshToken || []), tokenOrRefreshToken],
+			};
+		} else {
+			update = {
+				...existingData,
+				token: [...(existingData.token || []), tokenOrRefreshToken],
+			};
+		}
 
-  async saveToken(userId: string, token?: string, refreshToken?: string): Promise<void> {
-    let savedTokens: string[] = [];
-    let savedRefreshTokens: string[] = [];
+		this.tokens.set(userId, update);
+	}
 
-    if (this.tokens.has(userId)) {
-      if (token) {
-        savedTokens = await this.getToken(userId) ?? [];
-      }
-      if (refreshToken) {
-        savedRefreshTokens = await this.getRefreshToken(userId) ?? [];
-      }
-    }
+	async getRefreshToken(userId: string): Promise<string[] | null> {
+		return this.tokens.get(userId)?.refreshToken || null;
+	}
 
-    if (token) savedTokens.push(token);
-    if (refreshToken) savedRefreshTokens.push(refreshToken);
+	async deleteToken(userId: string): Promise<void> {
+		this.tokens.delete(userId);
+	}
 
-    this.tokens.set(userId, { token: savedTokens, refreshToken: savedRefreshTokens });
-  }
-
-  async deleteToken(userId: string): Promise<void> {
-    this.tokens.delete(userId);
-  }
+	async getToken?(userId: string): Promise<string[] | null> {
+		return this.tokens.get(userId)?.token || null;
+	}
 }

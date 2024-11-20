@@ -3,10 +3,9 @@ import { DataSource } from 'typeorm';
 
 import { User } from './entity/user.entity';
 import { Session } from './entity/session.entity';
+import { Token } from './entity/token.entity';
 
 const { DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE, NODE_ENV } = process.env;
-console.log({ DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_DATABASE, NODE_ENV });
-console.log(__dirname);
 
 export const AppDataSource = new DataSource({
 	type: 'postgres',
@@ -17,7 +16,7 @@ export const AppDataSource = new DataSource({
 	database: DB_DATABASE,
 	synchronize: !NODE_ENV || NODE_ENV === 'development' ? false : false,
 	logging: !NODE_ENV || NODE_ENV === 'development' ? false : false,
-	entities: [User, Session],
-	migrations: [`${__dirname}../../migrations/*.ts'`],
+	entities: [User, Session, Token],
+	migrations: [`${__dirname}/../../migrations/*.ts`],
 	subscribers: [],
 });

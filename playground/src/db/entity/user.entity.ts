@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, Index } from 'typeorm';
 
 @Entity({ name: 'users' })
 export abstract class User {
@@ -8,7 +8,8 @@ export abstract class User {
 	@Column({ nullable: false })
 	name: string;
 
-	@Column({ nullable: false })
+	@Index()
+	@Column({ nullable: false, unique: true })
 	email: string;
 
 	@Column({ nullable: false })
