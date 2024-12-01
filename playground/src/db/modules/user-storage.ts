@@ -24,9 +24,8 @@ export default class UserRepository {
 		return user;
 	}
 
-	async saveUser(userData: User): Promise<void> {
-		const user = await this.userRepository.save(userData);
-		console.log(user);
+	async saveUser(userData: User): Promise<User> {
+		return await this.userRepository.save(userData);
 	}
 
 	async deleteUser(userId: string): Promise<void> {

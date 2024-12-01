@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import { envValidate } from './helper/validator';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
@@ -7,6 +8,8 @@ import { configure } from 'jwt-smith';
 import { AppDataSource } from './db';
 import userRouters from './routes/user';
 import authRouters from './routes/auth';
+
+envValidate();
 
 const PORT = parseInt(process.env.APP_PORT || '3000', 10);
 const HOST = process.env.APP_HOST || 'localhost';
@@ -23,6 +26,9 @@ configure({
 	},
 });
 
+app.get('/', (req, res) => {
+	res.send('Welcome to the Playground!');
+});
 app.use('/user', userRouters);
 app.use('/auth', authRouters);
 /* Routes END */

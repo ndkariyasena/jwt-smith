@@ -18,5 +18,7 @@ export const AppDataSource = new DataSource({
 	logging: !NODE_ENV || NODE_ENV === 'development' ? false : false,
 	entities: [User, Session, Token],
 	migrations: [`${__dirname}/../../migrations/*.ts`],
+	migrationsTableName: 'migrations',
+	migrationsRun: true,
 	subscribers: [],
 });

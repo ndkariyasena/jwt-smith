@@ -1,17 +1,20 @@
 import { Request, Response } from 'express';
-import { userGenerator } from '../db/user.entity';
+import { User, UserRepository } from '../db';
 import { sign } from 'jwt-smith';
 
-const insertUser = userGenerator();
-insertUser.next();
-
 export const signUp = async (req: Request, res: Response) => {
-	console.log('---- signUp');
-	console.log(req.body);
-	const user = req.body;
-	const userId = insertUser.next(user).value;
+	const userData: User = req.body;
+	const user = new UserRepository();
 
-	res.send(`Sign In Complete for the user: ${userId}`);
+	await user
+		.saveUser(userData)
+		.then(({ id }) => {
+			console.debug('User insert successful!');
+			res.status(201).send({ message: 'Sign In Complete', userId: id });
+		})
+		.catch((error) => {
+			res.status(403).send({ message: 'User insert failed!', error: error.message });
+		});
 };
 
 export const signIn = async (req: Request, res: Response) => {
