@@ -18,30 +18,37 @@ export const signUp = async (req: Request, res: Response) => {
 };
 
 export const signIn = async (req: Request, res: Response) => {
-	console.log('---- signIn');
-	console.log(req.body);
-	const user = req.body;
+	const { email, password } = req.body;
+	const userRepo = new UserRepository();
+	const user = await userRepo.getUser({ email });
 
-	const tokenPayload = {
-		payload: {
-			user: {
-				name: user.name,
+	console.log({ user });
+
+	if (!user || user.password !== password) {
+		res.status(404).send({ message: 'User not found!' });
+	} else {
+		const tokenPayload = {
+			payload: {
+				user: {
+					name: user.name,
+					role: user.role,
+				},
 			},
-		},
-		secret: process.env.ACCESS_TOKEN_SECRET || '',
-		options: {
-			expiresIn: '1m',
-		},
-	};
+			secret: process.env.ACCESS_TOKEN_SECRET || '',
+			options: {
+				expiresIn: '1m',
+			},
+		};
 
-	const token = sign(tokenPayload);
+		const token = await sign(tokenPayload);
 
-	res.cookie('accessToken', token, {
-		maxAge: 300000,
-		httpOnly: true,
-	});
+		res.cookie('accessToken', token, {
+			maxAge: 300000,
+			httpOnly: true,
+		});
 
-	res.send('Sign In Complete');
+		res.status(200).send({ message: 'Sign In Complete', token });
+	}
 };
 
 export const signOut = async (req: Request, res: Response) => {
