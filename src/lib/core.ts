@@ -7,6 +7,8 @@ import {
 	Secret,
 	SignTokenOptions,
 	VerifyTokenOptions,
+	CookieNames,
+	MiddlewareConfigsOptions,
 } from './custom';
 import { log, logFormat, setLogger } from './logger';
 import { setDefaultSignOptions } from './signing-token';
@@ -15,22 +17,43 @@ import { setDefaultVerifyOptions } from './verify-token';
 export let tokenStorage: TokenStorage;
 export let sessionStorage: SessionStorage;
 export let publicKey: Secret | PublicKey;
+export let cookieNames: CookieNames = { accessToken: 'accessToken', refreshToken: 'refreshToken' };
+export let middlewareConfigs: MiddlewareConfigsOptions = {
+	authHeaderName: 'authorization',
+	appendToRequest: [],
+	cookies: { accessToken: undefined, refreshToken: undefined },
+};
 
 interface ConfigOptions {
-	tokenStorage?: TokenStorage | undefined;
-	sessionStorage?: SessionStorage | undefined;
+	tokenStorage?: TokenStorage;
+	sessionStorage?: SessionStorage;
 	logger?: Logger;
 	publicKey?: Secret | PublicKey;
-	signOptions?: SignTokenOptions | undefined;
-	verifyOptions?: VerifyTokenOptions | undefined;
+	signOptions?: SignTokenOptions;
+	verifyOptions?: VerifyTokenOptions;
+	cookieNames?: CookieNames;
+	middlewareConfigs?: MiddlewareConfigsOptions;
 }
+
+const secretSchema = Joi.alternatives().try(
+	Joi.string(),
+	Joi.binary(),
+	Joi.object().instance(Buffer),
+	Joi.object({
+		key: Joi.alternatives().try(Joi.string(), Joi.binary()),
+		passphrase: Joi.string(),
+	}),
+);
 
 const configOptionsSchema = Joi.object<ConfigOptions>({
 	tokenStorage: Joi.object<TokenStorage>().optional(),
 	sessionStorage: Joi.object<SessionStorage>().optional(),
 	logger: Joi.object<Logger>().optional(),
+	publicKey: secretSchema.optional(),
 	signOptions: Joi.object<SignTokenOptions>().optional(),
 	verifyOptions: Joi.object<VerifyTokenOptions>().optional(),
+	cookieNames: Joi.object<CookieNames>().optional(),
+	middlewareConfigs: Joi.object<MiddlewareConfigsOptions>().optional(),
 });
 
 export const configure = (options: ConfigOptions) => {
@@ -46,6 +69,11 @@ export const configure = (options: ConfigOptions) => {
 	if (value.tokenStorage) tokenStorage = value.tokenStorage;
 	if (value.sessionStorage) sessionStorage = value.sessionStorage;
 
-  if (value.signOptions) setDefaultSignOptions(value.signOptions);
-  if (value.verifyOptions) setDefaultVerifyOptions(value.verifyOptions);
+	if (value.publicKey) publicKey = value.publicKey;
+
+	if (value.signOptions) setDefaultSignOptions(value.signOptions);
+	if (value.verifyOptions) setDefaultVerifyOptions(value.verifyOptions);
+
+	if (value.cookieNames) cookieNames = value.cookieNames;
+	if (value.middlewareConfigs) middlewareConfigs = { ...middlewareConfigs, ...value.middlewareConfigs };
 };

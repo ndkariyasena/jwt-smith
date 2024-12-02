@@ -67,9 +67,11 @@ export interface VerifyTokenOptions {
 
 export interface TokenStorage {
 	getToken?: (userId: string) => Promise<string | string[] | null>;
-	saveToken?: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
-	deleteToken?: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
-	getRefreshToken: (userId: string) => Promise<string | string[] | null>;
+	saveToken: (userId: string, refreshToken: string, token: string) => Promise<void>;
+	saveToken: (userId: string, refreshToken: string) => Promise<void>;
+	saveToken: (userId: string, token: string) => Promise<void>;
+	deleteToken: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
+	getRefreshToken?: (userId: string) => Promise<string | string[] | null>;
 }
 
 export interface SessionStorage {
@@ -81,4 +83,15 @@ export interface SessionStorage {
 export interface RefreshTokenHandlerOptions {
 	tokenStorage?: TokenStorage;
 	sessionStorage?: SessionStorage;
+}
+
+export interface CookieNames {
+	accessToken: string | undefined;
+	refreshToken: string | undefined;
+}
+
+export interface MiddlewareConfigsOptions {
+	authHeaderName: string;
+	appendToRequest: string[];
+	cookies: CookieNames;
 }
