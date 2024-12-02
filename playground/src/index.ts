@@ -24,13 +24,15 @@ configure({
 	signOptions: {
 		algorithm: 'HS256',
 	},
+	// publicKey: 'mySupperPassowrd'
+	publicKey: process.env.ACCESS_TOKEN_SECRET,
 });
 
 app.get('/', (req, res) => {
 	res.send('Welcome to the Playground!');
 });
-app.use('/user', userRouters);
 app.use('/auth', authRouters);
+app.use('/user', userRouters);
 /* Routes END */
 
 /* Server start */

@@ -84,3 +84,14 @@ export interface RefreshTokenHandlerOptions {
 	tokenStorage?: TokenStorage;
 	sessionStorage?: SessionStorage;
 }
+
+export interface CookieNames {
+	accessToken: string | undefined;
+	refreshToken: string | undefined;
+}
+
+export interface MiddlewareConfigsOptions {
+	authHeaderName: string;
+	appendToRequest: string[];
+	cookies: CookieNames;
+}

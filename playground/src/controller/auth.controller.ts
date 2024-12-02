@@ -22,8 +22,6 @@ export const signIn = async (req: Request, res: Response) => {
 	const userRepo = new UserRepository();
 	const user = await userRepo.getUser({ email });
 
-	console.log({ user });
-
 	if (!user || user.password !== password) {
 		res.status(404).send({ message: 'User not found!' });
 	} else {
@@ -36,7 +34,7 @@ export const signIn = async (req: Request, res: Response) => {
 			},
 			secret: process.env.ACCESS_TOKEN_SECRET || '',
 			options: {
-				expiresIn: '1m',
+				expiresIn: '2m',
 			},
 		};
 
