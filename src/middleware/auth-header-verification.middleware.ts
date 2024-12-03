@@ -1,45 +1,59 @@
-import { NextFunction, Request, Response } from 'express';
-import { extractAuthHeaderValue } from 'src/helper/utils';
+import { NextFunction, Response } from 'express';
 import { middlewareConfigs, publicKey } from 'src/lib/core';
+import { AppendToRequest, AuthedRequest } from 'src/lib/custom';
 
 import { log } from 'src/lib/logger';
 import { verify } from 'src/lib/verify-token';
 
-const validateJwtHeaderMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {
 	try {
-		const { appendToRequest, authHeaderName } = middlewareConfigs;
-		let authHeader = req.headers[authHeaderName];
+		const { appendToRequest = [], authHeaderName, authTokenExtractor } = middlewareConfigs;
+		let authHeader = req.headers[authHeaderName ?? ''];
 
 		if (Array.isArray(authHeader)) authHeader = authHeader.join(' ');
-		console.log({ authHeaderName, authHeader, appendToRequest });
 
 		if (!authHeader || !authHeader.startsWith('Bearer ')) {
-			console.log('--- Not starts with Bearer');
-			res.sendStatus(401);
-		} else {
-			console.log('verifying');
-			let decodedTokenPayload;
-			const tokenValue = extractAuthHeaderValue(authHeader);
-			console.log({
-				authHeader,
-				tokenValue,
-			});
+			throw new Error('Valid auth header not found!');
+		} else if (authTokenExtractor) {
+			const tokenValue = authTokenExtractor(authHeader);
 
 			if (tokenValue) {
-				decodedTokenPayload = await verify({
+				const decodedTokenPayload = await verify({
 					token: tokenValue,
 					secret: publicKey,
 				});
 
-				console.log(decodedTokenPayload);
-				if (appendToRequest?.length > 0) {
-					console.log(appendToRequest);
+				if (!decodedTokenPayload) {
+					throw new Error('Token payload is undefined!');
+				}
+
+				if (
+					Array.isArray(appendToRequest) &&
+					appendToRequest?.length > 0 &&
+					decodedTokenPayload &&
+					typeof decodedTokenPayload !== 'string'
+				) {
+					try {
+						const castedPayload = decodedTokenPayload as unknown as Record<string, unknown>;
+
+						appendToRequest.forEach((item: AppendToRequest) => {
+							if (Object.hasOwn(castedPayload, item)) {
+								req[item] = castedPayload[item];
+							}
+						});
+					} catch (error) {
+						log('error', 'Token payload appending to the request failed!', error);
+					}
+				} else if (typeof appendToRequest === 'boolean' && typeof decodedTokenPayload === 'string') {
+					req.tokenPayload = decodedTokenPayload;
 				}
 			} else {
 				throw new Error('Auth token not found.');
 			}
 
 			next();
+		} else {
+			throw new Error('Token value extractor method not found.');
 		}
 	} catch (error) {
 		log('error', 'Error occurred while authenticating the JST token.', error);

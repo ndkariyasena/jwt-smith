@@ -1,12 +1,12 @@
-import { Logger } from "./custom";
+import { Logger } from './custom';
 
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 
 interface LoggerOptions {
-  setPrefix: boolean
+	setPrefix: boolean;
 }
 
-const LOGGER_PREFIX = '[JWTx] ';
+const LOGGER_PREFIX = '[JWT-Smith] ';
 
 let currentLogger: Logger = console;
 
@@ -37,8 +37,8 @@ export const getLogger = (): Logger => {
  * Format log messages. This function formats a given log message based on the logSettings configuration.
  */
 export const logFormat = (message: string): string => {
-  return `${logSettings.setPrefix ? LOGGER_PREFIX : ''}${message}`;
-}
+	return `${logSettings.setPrefix ? LOGGER_PREFIX : ''}${message}`;
+};
 
 /**
  * Logs a message at a specified level using the current logger.

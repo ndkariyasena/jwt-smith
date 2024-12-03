@@ -1,3 +1,4 @@
+import { Request } from 'express';
 import { JsonWebKeyInput, KeyObject, PrivateKeyInput, PublicKeyInput } from 'node:crypto';
 
 export interface Logger {
@@ -86,12 +87,22 @@ export interface RefreshTokenHandlerOptions {
 }
 
 export interface CookieNames {
-	accessToken: string | undefined;
-	refreshToken: string | undefined;
+	accessToken?: string | undefined;
+	refreshToken?: string | undefined;
 }
 
+export type AppendToRequest = 'user' | 'role' | 'language' | 'tokenPayload';
+
 export interface MiddlewareConfigsOptions {
-	authHeaderName: string;
-	appendToRequest: string[];
-	cookies: CookieNames;
+	authHeaderName?: string;
+	appendToRequest?: AppendToRequest[] | true;
+	cookies?: CookieNames;
+	authTokenExtractor?: (header: string) => string;
+}
+
+export interface AuthedRequest extends Request {
+	user?: unknown;
+	role?: unknown;
+	language?: unknown;
+	tokenPayload?: unknown;
 }

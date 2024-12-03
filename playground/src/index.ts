@@ -24,8 +24,10 @@ configure({
 	signOptions: {
 		algorithm: 'HS256',
 	},
-	// publicKey: 'mySupperPassowrd'
 	publicKey: process.env.ACCESS_TOKEN_SECRET,
+	middlewareConfigs: {
+		appendToRequest: ['user'],
+	},
 });
 
 app.get('/', (req, res) => {
