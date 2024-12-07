@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import { JsonWebKeyInput, KeyObject, PrivateKeyInput, PublicKeyInput } from 'node:crypto';
+import { AppendToRequest } from 'src/lib/custom';
 
 export interface Logger {
 	info: (message: string, ...args: unknown[]) => void;
@@ -87,15 +88,16 @@ export interface RefreshTokenHandlerOptions {
 }
 
 export interface CookieNames {
-	accessToken?: string | undefined;
-	refreshToken?: string | undefined;
+	accessToken: string;
+	refreshToken?: string;
 }
 
-export type AppendToRequest = 'user' | 'role' | 'language' | 'tokenPayload';
+export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPayload';
+export type AppendToRequest = AppendToRequestProperties[] | true;
 
 export interface MiddlewareConfigsOptions {
 	authHeaderName?: string;
-	appendToRequest?: AppendToRequest[] | true;
+	appendToRequest?: AppendToRequest;
 	cookies?: CookieNames;
 	authTokenExtractor?: (header: string) => string;
 }

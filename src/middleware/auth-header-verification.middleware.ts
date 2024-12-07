@@ -1,7 +1,6 @@
 import { NextFunction, Response } from 'express';
 import { middlewareConfigs, publicKey } from 'src/lib/core';
-import { AppendToRequest, AuthedRequest } from 'src/lib/custom';
-
+import { AppendToRequestProperties, AuthedRequest } from 'src/lib/custom';
 import { log } from 'src/lib/logger';
 import { verify } from 'src/lib/verify-token';
 
@@ -36,7 +35,7 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 					try {
 						const castedPayload = decodedTokenPayload as unknown as Record<string, unknown>;
 
-						appendToRequest.forEach((item: AppendToRequest) => {
+						appendToRequest.forEach((item: AppendToRequestProperties) => {
 							if (Object.hasOwn(castedPayload, item)) {
 								req[item] = castedPayload[item];
 							}

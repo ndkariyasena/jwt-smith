@@ -22,7 +22,7 @@ export let cookieNames: CookieNames = { accessToken: 'accessToken', refreshToken
 export let middlewareConfigs: MiddlewareConfigsOptions = {
 	authHeaderName: 'authorization',
 	appendToRequest: [],
-	cookies: { accessToken: undefined, refreshToken: undefined },
+	cookies: { accessToken: 'accessToken', refreshToken: undefined },
 	authTokenExtractor: extractAuthHeaderValue,
 };
 
@@ -31,6 +31,7 @@ interface ConfigOptions {
 	sessionStorage?: SessionStorage;
 	logger?: Logger;
 	publicKey?: Secret | PublicKey;
+	refreshTokenKey?: Secret | PublicKey;
 	signOptions?: SignTokenOptions;
 	verifyOptions?: VerifyTokenOptions;
 	cookieNames?: CookieNames;
@@ -52,6 +53,7 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
 	sessionStorage: Joi.object<SessionStorage>().optional(),
 	logger: Joi.object<Logger>().optional(),
 	publicKey: secretSchema.optional(),
+	refreshTokenKey: secretSchema.optional(),
 	signOptions: Joi.object<SignTokenOptions>().optional(),
 	verifyOptions: Joi.object<VerifyTokenOptions>().optional(),
 	cookieNames: Joi.object<CookieNames>().optional(),

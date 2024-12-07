@@ -5,41 +5,29 @@ import { log } from 'src/lib/logger';
 import { verify } from 'src/lib/verify-token';
 import { cookieNames } from '../lib/core';
 
-const authenticateJwtMiddleware = async (req: Request, res: Response, next: NextFunction) => {
+const authenticateJwtMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
-		const authHeader = (req.headers.authorization || req.headers.Authorization) as unknown as string;
-
 		const accessToken = req.cookies[cookieNames.accessToken];
-		const refreshToken = req.cookies[cookieNames.refreshToken];
+		const refreshToken = cookieNames.refreshToken ? req.cookies[cookieNames.refreshToken] : undefined;
 
-		if ((!authHeader || authHeader.startsWith('Bearer ')) && !accessToken && !refreshToken) {
-			return res.sendStatus(401);
+		if (!accessToken && !refreshToken) {
+			throw new Error('Auth cookie not found!');
 		}
-
-		let decodedTokenPayload;
-		let tokenValue;
-
-		if (authHeader && authHeader.split(' ')[1]) {
-			tokenValue = authHeader.split(' ')[1] as string;
-		} else {
-			tokenValue = accessToken;
-		}
-
-		if (tokenValue) {
-			decodedTokenPayload = await verify({
-				token: tokenValue,
-				secret: publicKey,
+		await verify({
+			token: accessToken,
+			secret: publicKey,
+		})
+			.then((decodedTokenPayload) => {
+				console.log(decodedTokenPayload);
+			})
+			.catch((error) => {
+				console.error(error);
 			});
-
-			console.log(decodedTokenPayload);
-		} else {
-			throw new Error('Token not found.');
-		}
 
 		return next();
 	} catch (error) {
 		log('error', 'Error occurred while authenticating the JST token.', error);
-		return res.sendStatus(401);
+		res.sendStatus(401);
 	}
 };
 
