@@ -1,11 +1,17 @@
 import DefaultTokenStorage from 'src/module/token-storage';
-import { TokenStorage, RefreshTokenHandlerOptions, VerifyResponse } from './custom';
+import {
+	TokenStorage,
+	RefreshTokenHandlerOptions,
+	VerifyResponse,
+	TokenExpiredError,
+	ValidateResponse,
+} from './custom';
 import { publicKey, refreshTokenKey } from 'src/lib/core';
 import { log } from './logger';
 import { verify } from 'src/lib/verify-token';
 
 /* TODO: Next step is to implement the session handling. */
-export class RefreshTokenHandler {
+export class TokenHandler {
 	private refreshTokenStorage: TokenStorage;
 	private tokenGenerationHandler: (
 		refreshTokenPayload: VerifyResponse,
@@ -16,11 +22,40 @@ export class RefreshTokenHandler {
 		this.tokenGenerationHandler = options.tokenGenerationHandler;
 
 		if (!options.refreshTokenStorage) {
-			log(
-				'warn',
-				'[RefreshTokenHandler]: Using default in-memory token storage. This is not recommended for production.',
-			);
+			log('warn', '[TokenHandler]: Using default in-memory token storage. This is not recommended for production.');
 		}
+	}
+
+	async validateAuthToken(authToken: string, refreshToken: string | undefined): Promise<ValidateResponse> {
+		let decodedToken: VerifyResponse;
+		let token: string = authToken;
+		let nextRefreshToken: string | undefined = refreshToken;
+
+		await verify({
+			token: authToken,
+			secret: publicKey,
+		})
+			.then((tokenPayload) => {
+				decodedToken = tokenPayload;
+			})
+			.catch(async (error) => {
+				if (error instanceof TokenExpiredError && refreshToken) {
+					const response = await this.rotateRefreshToken(refreshToken);
+
+					console.log({ response });
+					token = response.token;
+					nextRefreshToken = response.refreshToken;
+
+					decodedToken = await verify({
+						token,
+						secret: publicKey,
+					});
+				} else {
+					throw error;
+				}
+			});
+
+		return { decodedToken, nextRefreshToken, token };
 	}
 
 	async rotateRefreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
@@ -55,6 +90,10 @@ export class RefreshTokenHandler {
 			throw new Error('Could not found a user for the token.');
 		}
 
-		return await this.tokenGenerationHandler(decodedTokenPayload);
+		const response = await this.tokenGenerationHandler(decodedTokenPayload);
+
+		await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken);
+
+		return response;
 	}
 }

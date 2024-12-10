@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request, CookieOptions } from 'express';
 import { JsonWebKeyInput, KeyObject, PrivateKeyInput, PublicKeyInput } from 'node:crypto';
 import { AppendToRequest } from 'src/lib/custom';
 
@@ -36,6 +36,12 @@ export type Session = string | string[] | Record<string, unknown> | Record<strin
 
 export type VerifyResponse = string | Jwt | JwtPayload | undefined;
 
+export interface ValidateResponse {
+	decodedToken: VerifyResponse;
+	nextRefreshToken: string | undefined;
+	token: string;
+}
+
 export interface SignTokenOptions {
 	algorithm?: Algorithm | undefined;
 	keyid?: string | undefined;
@@ -72,9 +78,7 @@ export interface VerifyTokenOptions {
 export interface TokenStorage {
 	getToken?: (userId: string) => Promise<string | string[] | null>;
 	getTokenHolder: (refreshToken: string) => Promise<unknown | null>;
-	saveOrUpdateToken: (userId: string, refreshToken: string, token: string) => Promise<void>;
-	saveOrUpdateToken: (userId: string, refreshToken: string) => Promise<void>;
-	saveOrUpdateToken: (userId: string, token: string) => Promise<void>;
+	saveOrUpdateToken: (userId: string, refreshToken: string, token?: string) => Promise<void>;
 	deleteToken: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
 	getRefreshToken?: (userId: string) => Promise<string | string[] | null>;
 	blackListToken: (token: string, relatedData: Record<string, unknown>) => Promise<void>;
@@ -94,8 +98,10 @@ export interface RefreshTokenHandlerOptions {
 }
 
 export interface CookieNames {
-	accessToken: string;
+	accessToken?: string;
+	accessTokenOptions?: CookieOptions;
 	refreshToken?: string;
+	refreshTokenOptions?: CookieOptions;
 }
 
 export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPayload';

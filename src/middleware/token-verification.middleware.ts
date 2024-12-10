@@ -1,49 +1,45 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { middlewareConfigs, publicKey, tokenStorage } from 'src/lib/core';
+import { middlewareConfigs, tokenStorage } from 'src/lib/core';
 import { log } from 'src/lib/logger';
-import { verify } from 'src/lib/verify-token';
 import { cookieNames } from 'src/lib/core';
-import { TokenExpiredError, VerifyResponse } from 'src/lib/custom';
 import { appendTokenPayloadToRequest } from 'src/helper/utils';
-import { RefreshTokenHandler } from 'src/lib/refresh-token-handler';
+import { TokenHandler } from 'src/lib/refresh-token-handler';
 
 const authenticateJwtMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
 		const { appendToRequest = [], tokenGenerationHandler } = middlewareConfigs;
 
-		const accessToken = req.cookies[cookieNames.accessToken];
+		const accessToken = cookieNames.accessToken ? req.cookies[cookieNames.accessToken] : undefined;
 		const refreshToken = cookieNames.refreshToken ? req.cookies[cookieNames.refreshToken] : undefined;
 
 		if (!accessToken && !refreshToken) {
 			throw new Error('Auth cookie not found!');
 		}
 
-		await verify({
-			token: accessToken,
-			secret: publicKey,
-		})
-			.then((decodedTokenPayload: VerifyResponse) => {
-				if (!decodedTokenPayload) {
-					throw new Error('Auth cookie payload is undefined!');
-				}
+		const refreshTokenHandler = new TokenHandler({
+			refreshTokenStorage: tokenStorage,
+			tokenGenerationHandler: tokenGenerationHandler,
+		});
 
-				appendTokenPayloadToRequest(req, appendToRequest, decodedTokenPayload);
-			})
-			.catch(async (error) => {
-				if (error instanceof TokenExpiredError && refreshToken) {
-					const refreshTokenHandler = new RefreshTokenHandler({
-						refreshTokenStorage: tokenStorage,
-						tokenGenerationHandler: tokenGenerationHandler,
-					});
+		const { decodedToken, nextRefreshToken, token } = await refreshTokenHandler.validateAuthToken(
+			accessToken,
+			refreshToken,
+		);
 
-					const response = await refreshTokenHandler.rotateRefreshToken(refreshToken);
+		if (!decodedToken) {
+			throw new Error('Auth cookie payload is undefined!');
+		}
 
-					console.log({ response });
-				} else {
-					throw error;
-				}
-			});
+		appendTokenPayloadToRequest(req, appendToRequest, decodedToken);
+
+		if (cookieNames.accessToken) {
+			res.cookie(cookieNames.accessToken, token, cookieNames.accessTokenOptions || {});
+		}
+
+		if (cookieNames.refreshToken && nextRefreshToken) {
+			res.cookie(cookieNames.refreshToken, nextRefreshToken, cookieNames.refreshTokenOptions || {});
+		}
 
 		next();
 	} catch (error) {

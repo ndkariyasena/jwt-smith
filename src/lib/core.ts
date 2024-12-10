@@ -19,11 +19,15 @@ export let tokenStorage: TokenStorage;
 export let sessionStorage: SessionStorage;
 export let publicKey: Secret | PublicKey;
 export let refreshTokenKey: Secret | PublicKey;
-export let cookieNames: CookieNames = { accessToken: 'accessToken', refreshToken: 'refreshToken' };
+export let cookieNames: CookieNames = {
+	accessToken: 'accessToken',
+	accessTokenOptions: {},
+	refreshToken: 'refreshToken',
+};
 export let middlewareConfigs: MiddlewareConfigsOptions = {
 	authHeaderName: 'authorization',
 	appendToRequest: [],
-	cookies: { accessToken: 'accessToken', refreshToken: undefined },
+	cookies: { accessToken: 'accessToken', accessTokenOptions: {}, refreshToken: undefined },
 	authTokenExtractor: extractAuthHeaderValue,
 	tokenGenerationHandler: defaultTokenGenerationHandler,
 };

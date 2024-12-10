@@ -1,6 +1,6 @@
 {
 	"name": "jwt-smith",
-	"version": "0.0.3",
+	"version": "0.0.1",
 	"description": "Enhanced JWT Authentication and Authorization Module",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",

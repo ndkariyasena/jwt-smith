@@ -1,7 +1,6 @@
 import { TokenStorage } from 'src/lib/custom';
 
 interface tokenEntity {
-	token?: string[];
 	refreshToken?: string[];
 }
 
@@ -9,16 +8,11 @@ export default class DefaultTokenStorage implements TokenStorage {
 	private tokens = new Map<string, tokenEntity>();
 	private defectedTokens = new Map<string, Record<string, unknown>>();
 
-	async saveOrUpdateToken(userId: string, tokenOrRefreshToken: string, refreshToken?: string): Promise<void> {
-		const existingData = this.tokens.get(userId) || { token: [], refreshToken: [] };
+	async saveOrUpdateToken(userId: string, tokenOrRefreshToken: string): Promise<void> {
+		const existingData = this.tokens.get(userId) || { refreshToken: [] };
 		let update = {};
 
-		if (refreshToken) {
-			update = {
-				token: [...(existingData.token || []), tokenOrRefreshToken],
-				refreshToken: [...(existingData.refreshToken || []), refreshToken],
-			};
-		} else if (existingData.refreshToken?.includes(tokenOrRefreshToken)) {
+		if (existingData.refreshToken?.includes(tokenOrRefreshToken)) {
 			update = {
 				...existingData,
 				refreshToken: [...(existingData.refreshToken || []), tokenOrRefreshToken],
@@ -26,7 +20,7 @@ export default class DefaultTokenStorage implements TokenStorage {
 		} else {
 			update = {
 				...existingData,
-				token: [...(existingData.token || []), tokenOrRefreshToken],
+				refreshToken: [tokenOrRefreshToken],
 			};
 		}
 
@@ -56,7 +50,7 @@ export default class DefaultTokenStorage implements TokenStorage {
 	}
 
 	async getToken?(userId: string): Promise<string[] | null> {
-		return this.tokens.get(userId)?.token || null;
+		return this.tokens.get(userId)?.refreshToken || null;
 	}
 
 	async blackListToken(token: string, relatedData: Record<string, unknown>): Promise<void> {
