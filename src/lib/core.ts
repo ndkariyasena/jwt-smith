@@ -13,17 +13,19 @@ import {
 import { log, logFormat, setLogger } from './logger';
 import { setDefaultSignOptions } from './signing-token';
 import { setDefaultVerifyOptions } from './verify-token';
-import { extractAuthHeaderValue } from 'src/helper/utils';
+import { defaultTokenGenerationHandler, extractAuthHeaderValue } from 'src/helper/utils';
 
 export let tokenStorage: TokenStorage;
 export let sessionStorage: SessionStorage;
 export let publicKey: Secret | PublicKey;
+export let refreshTokenKey: Secret | PublicKey;
 export let cookieNames: CookieNames = { accessToken: 'accessToken', refreshToken: 'refreshToken' };
 export let middlewareConfigs: MiddlewareConfigsOptions = {
 	authHeaderName: 'authorization',
 	appendToRequest: [],
 	cookies: { accessToken: 'accessToken', refreshToken: undefined },
 	authTokenExtractor: extractAuthHeaderValue,
+	tokenGenerationHandler: defaultTokenGenerationHandler,
 };
 
 interface ConfigOptions {
@@ -74,6 +76,7 @@ export const configure = (options: ConfigOptions) => {
 	if (value.sessionStorage) sessionStorage = value.sessionStorage;
 
 	if (value.publicKey) publicKey = value.publicKey;
+	if (value.refreshTokenKey) refreshTokenKey = value.refreshTokenKey;
 
 	if (value.signOptions) setDefaultSignOptions(value.signOptions);
 	if (value.verifyOptions) setDefaultVerifyOptions(value.verifyOptions);

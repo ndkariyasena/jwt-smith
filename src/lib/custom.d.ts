@@ -34,6 +34,8 @@ export type PublicKey = PublicKeyInput | string | Buffer | KeyObject | JsonWebKe
 
 export type Session = string | string[] | Record<string, unknown> | Record<string, unknown>[];
 
+export type VerifyResponse = string | Jwt | JwtPayload | undefined;
+
 export interface SignTokenOptions {
 	algorithm?: Algorithm | undefined;
 	keyid?: string | undefined;
@@ -69,11 +71,14 @@ export interface VerifyTokenOptions {
 
 export interface TokenStorage {
 	getToken?: (userId: string) => Promise<string | string[] | null>;
-	saveToken: (userId: string, refreshToken: string, token: string) => Promise<void>;
-	saveToken: (userId: string, refreshToken: string) => Promise<void>;
-	saveToken: (userId: string, token: string) => Promise<void>;
+	getTokenHolder: (refreshToken: string) => Promise<unknown | null>;
+	saveOrUpdateToken: (userId: string, refreshToken: string, token: string) => Promise<void>;
+	saveOrUpdateToken: (userId: string, refreshToken: string) => Promise<void>;
+	saveOrUpdateToken: (userId: string, token: string) => Promise<void>;
 	deleteToken: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
 	getRefreshToken?: (userId: string) => Promise<string | string[] | null>;
+	blackListToken: (token: string, relatedData: Record<string, unknown>) => Promise<void>;
+	checkInBlackListedToken: (token: string) => Promise<Record<string, unknown> | undefined>;
 }
 
 export interface SessionStorage {
@@ -83,8 +88,9 @@ export interface SessionStorage {
 }
 
 export interface RefreshTokenHandlerOptions {
-	tokenStorage?: TokenStorage;
+	refreshTokenStorage?: TokenStorage;
 	sessionStorage?: SessionStorage;
+	tokenGenerationHandler: (refreshTokenPayload: VerifyResponse) => Promise<{ token: string; refreshToken: string }>;
 }
 
 export interface CookieNames {
@@ -95,16 +101,17 @@ export interface CookieNames {
 export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPayload';
 export type AppendToRequest = AppendToRequestProperties[] | true;
 
-export interface MiddlewareConfigsOptions {
-	authHeaderName?: string;
-	appendToRequest?: AppendToRequest;
-	cookies?: CookieNames;
-	authTokenExtractor?: (header: string) => string;
-}
-
 export interface AuthedRequest extends Request {
 	user?: unknown;
 	role?: unknown;
 	language?: unknown;
 	tokenPayload?: unknown;
+}
+
+export interface MiddlewareConfigsOptions {
+	authHeaderName?: string;
+	appendToRequest?: AppendToRequest;
+	cookies?: CookieNames;
+	authTokenExtractor?: (header: string) => string;
+	tokenGenerationHandler: (refreshTokenPayload: VerifyResponse) => Promise<{ token: string; refreshToken: string }>;
 }

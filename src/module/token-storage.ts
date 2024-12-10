@@ -7,8 +7,9 @@ interface tokenEntity {
 
 export default class DefaultTokenStorage implements TokenStorage {
 	private tokens = new Map<string, tokenEntity>();
+	private defectedTokens = new Map<string, Record<string, unknown>>();
 
-	async saveToken(userId: string, tokenOrRefreshToken: string, refreshToken?: string): Promise<void> {
+	async saveOrUpdateToken(userId: string, tokenOrRefreshToken: string, refreshToken?: string): Promise<void> {
 		const existingData = this.tokens.get(userId) || { token: [], refreshToken: [] };
 		let update = {};
 
@@ -32,6 +33,20 @@ export default class DefaultTokenStorage implements TokenStorage {
 		this.tokens.set(userId, update);
 	}
 
+	async getTokenHolder(refreshToken: string): Promise<Record<string, unknown> | null> {
+		let holder = null;
+
+		this.tokens.forEach((data, userId) => {
+			if (data.refreshToken?.includes(refreshToken)) {
+				holder = this.tokens.get(userId);
+
+				return;
+			}
+		});
+
+		return holder;
+	}
+
 	async getRefreshToken(userId: string): Promise<string[] | null> {
 		return this.tokens.get(userId)?.refreshToken || null;
 	}
@@ -42,5 +57,13 @@ export default class DefaultTokenStorage implements TokenStorage {
 
 	async getToken?(userId: string): Promise<string[] | null> {
 		return this.tokens.get(userId)?.token || null;
+	}
+
+	async blackListToken(token: string, relatedData: Record<string, unknown>): Promise<void> {
+		this.defectedTokens.set(token, relatedData);
+	}
+
+	async checkInBlackListedToken(token: string): Promise<Record<string, unknown> | undefined> {
+		return this.defectedTokens.get(token);
 	}
 }

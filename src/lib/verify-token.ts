@@ -1,8 +1,8 @@
-import jsonwebtoken, { Jwt, JwtPayload } from 'jsonwebtoken';
+import jsonwebtoken from 'jsonwebtoken';
 import Joi from 'joi';
 import { log, logFormat } from './logger';
 
-import { VerifyTokenOptions, PublicKey, Secret } from './custom';
+import { VerifyTokenOptions, PublicKey, Secret, VerifyResponse } from './custom';
 
 interface VerifyTokenParams {
 	token: string;
@@ -44,7 +44,7 @@ const verifyTokenParamsSchema = Joi.object<VerifyTokenParams>({
 
 let defaultVerifyOptions: VerifyTokenOptions = {};
 
-export const verify = (parameters: VerifyTokenParams): Promise<string | Jwt | JwtPayload | undefined> => {
+export const verify = (parameters: VerifyTokenParams): Promise<VerifyResponse> => {
 	return new Promise((resolve, reject) => {
 		const { error, warning, value } = verifyTokenParamsSchema.validate(parameters);
 

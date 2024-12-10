@@ -1,5 +1,4 @@
-import { Jwt, JwtPayload } from 'jsonwebtoken';
-import { AppendToRequest, AppendToRequestProperties, AuthedRequest } from 'src/lib/custom';
+import { AppendToRequest, AppendToRequestProperties, AuthedRequest, VerifyResponse } from 'src/lib/custom';
 import { log } from 'src/lib/logger';
 
 export const extractAuthHeaderValue = (header: string): string => {
@@ -17,7 +16,7 @@ export const extractAuthHeaderValue = (header: string): string => {
 export const appendTokenPayloadToRequest = (
 	req: AuthedRequest,
 	appendToRequest: AppendToRequest,
-	decodedTokenPayload: string | Jwt | JwtPayload | undefined,
+	decodedTokenPayload: VerifyResponse,
 ) => {
 	if (
 		Array.isArray(appendToRequest) &&
@@ -39,4 +38,12 @@ export const appendTokenPayloadToRequest = (
 	} else if (typeof appendToRequest === 'boolean' && typeof decodedTokenPayload === 'string') {
 		req.tokenPayload = decodedTokenPayload;
 	}
+};
+
+export const defaultTokenGenerationHandler = async (refreshTokenPayload: VerifyResponse) => {
+	console.log({ refreshTokenPayload });
+	return {
+		token: 'new-token',
+		refreshToken: 'new-refresh-token',
+	};
 };
