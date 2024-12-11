@@ -1,6 +1,5 @@
 import { Request, CookieOptions } from 'express';
 import { JsonWebKeyInput, KeyObject, PrivateKeyInput, PublicKeyInput } from 'node:crypto';
-import { AppendToRequest } from 'src/lib/custom';
 
 export interface Logger {
 	info: (message: string, ...args: unknown[]) => void;
@@ -35,6 +34,15 @@ export type PublicKey = PublicKeyInput | string | Buffer | KeyObject | JsonWebKe
 export type Session = string | string[] | Record<string, unknown> | Record<string, unknown>[];
 
 export type VerifyResponse = string | Jwt | JwtPayload | undefined;
+
+export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPayload';
+
+export type AppendToRequest = AppendToRequestProperties[] | true;
+
+export type TokenGenerationHandler = (
+	refreshTokenPayload: VerifyResponse,
+	tokenHolder: Record<string, unknown>,
+) => Promise<{ token: string; refreshToken: string }>;
 
 export interface ValidateResponse {
 	decodedToken: VerifyResponse;
@@ -77,7 +85,7 @@ export interface VerifyTokenOptions {
 
 export interface TokenStorage {
 	getToken?: (userId: string) => Promise<string | string[] | null>;
-	getTokenHolder: (refreshToken: string) => Promise<unknown | null>;
+	getTokenHolder: (refreshToken: string) => Promise<Record<string, unknown> | null>;
 	saveOrUpdateToken: (userId: string, refreshToken: string, token?: string) => Promise<void>;
 	deleteToken: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
 	getRefreshToken?: (userId: string) => Promise<string | string[] | null>;
@@ -94,18 +102,15 @@ export interface SessionStorage {
 export interface RefreshTokenHandlerOptions {
 	refreshTokenStorage?: TokenStorage;
 	sessionStorage?: SessionStorage;
-	tokenGenerationHandler: (refreshTokenPayload: VerifyResponse) => Promise<{ token: string; refreshToken: string }>;
+	tokenGenerationHandler: TokenGenerationHandler;
 }
 
-export interface CookieNames {
-	accessToken?: string;
-	accessTokenOptions?: CookieOptions;
-	refreshToken?: string;
-	refreshTokenOptions?: CookieOptions;
+export interface CookieSettings {
+	accessTokenCookieName?: string;
+	accessCookieOptions?: CookieOptions;
+	refreshTokenCookieName?: string;
+	refreshCookieOptions?: CookieOptions;
 }
-
-export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPayload';
-export type AppendToRequest = AppendToRequestProperties[] | true;
 
 export interface AuthedRequest extends Request {
 	user?: unknown;
@@ -117,7 +122,7 @@ export interface AuthedRequest extends Request {
 export interface MiddlewareConfigsOptions {
 	authHeaderName?: string;
 	appendToRequest?: AppendToRequest;
-	cookies?: CookieNames;
+	cookies?: CookieSettings;
 	authTokenExtractor?: (header: string) => string;
-	tokenGenerationHandler: (refreshTokenPayload: VerifyResponse) => Promise<{ token: string; refreshToken: string }>;
+	tokenGenerationHandler: TokenGenerationHandler;
 }

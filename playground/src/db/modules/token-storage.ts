@@ -11,7 +11,7 @@ export default class TokenRepository implements TokenStorage {
 		this.tokenRepository = AppDataSource.getRepository(Token);
 	}
 
-	async saveToken(userId: string, tokenOrRefreshToken: string, refreshToken?: string): Promise<void> {
+	async saveOrUpdateToken(userId: string, tokenOrRefreshToken: string, refreshToken?: string): Promise<void> {
 		let tokenEntity = await this.tokenRepository.findOne({ where: { userId } });
 
 		if (!tokenEntity) {
@@ -30,6 +30,11 @@ export default class TokenRepository implements TokenStorage {
 		await this.tokenRepository.save(tokenEntity);
 	}
 
+	async getTokenHolder(refreshToken: string): Promise<Record<string, unknown> | null> {
+		let tokenEntity = await this.tokenRepository.findOne({ where: { refreshTokens: refreshToken } });
+		return tokenEntity ? { id: tokenEntity.userId } : null;
+	}
+
 	async getToken?(userId: string): Promise<string[] | null> {
 		const tokenEntity = await this.tokenRepository.findOne({ where: { userId } });
 		return tokenEntity?.tokens || null;
@@ -42,5 +47,13 @@ export default class TokenRepository implements TokenStorage {
 
 	async deleteToken(userId: string): Promise<void> {
 		await this.tokenRepository.delete({ userId });
+	}
+
+	async blackListToken(token: string, relatedData: Record<string, unknown>): Promise<void> {
+		console.log('blackListToken');
+	}
+
+	async checkInBlackListedToken(token: string): Promise<Record<string, unknown> | undefined> {
+		return undefined;
 	}
 }

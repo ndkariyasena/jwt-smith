@@ -1,4 +1,4 @@
-import { Logger } from './custom';
+import { Logger } from './custom.d';
 
 type LogLevel = 'info' | 'warn' | 'error' | 'debug';
 

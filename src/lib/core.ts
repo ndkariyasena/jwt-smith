@@ -7,9 +7,9 @@ import {
 	Secret,
 	SignTokenOptions,
 	VerifyTokenOptions,
-	CookieNames,
+	CookieSettings,
 	MiddlewareConfigsOptions,
-} from './custom';
+} from './custom.d';
 import { log, logFormat, setLogger } from './logger';
 import { setDefaultSignOptions } from './signing-token';
 import { setDefaultVerifyOptions } from './verify-token';
@@ -19,15 +19,15 @@ export let tokenStorage: TokenStorage;
 export let sessionStorage: SessionStorage;
 export let publicKey: Secret | PublicKey;
 export let refreshTokenKey: Secret | PublicKey;
-export let cookieNames: CookieNames = {
-	accessToken: 'accessToken',
-	accessTokenOptions: {},
-	refreshToken: 'refreshToken',
+export let cookieSettings: CookieSettings = {
+	accessTokenCookieName: 'accessToken',
+	accessCookieOptions: {},
+	refreshTokenCookieName: 'refreshToken',
 };
 export let middlewareConfigs: MiddlewareConfigsOptions = {
 	authHeaderName: 'authorization',
 	appendToRequest: [],
-	cookies: { accessToken: 'accessToken', accessTokenOptions: {}, refreshToken: undefined },
+	cookies: { accessTokenCookieName: 'accessToken', accessCookieOptions: {}, refreshTokenCookieName: undefined },
 	authTokenExtractor: extractAuthHeaderValue,
 	tokenGenerationHandler: defaultTokenGenerationHandler,
 };
@@ -40,7 +40,7 @@ interface ConfigOptions {
 	refreshTokenKey?: Secret | PublicKey;
 	signOptions?: SignTokenOptions;
 	verifyOptions?: VerifyTokenOptions;
-	cookieNames?: CookieNames;
+	cookieSettings?: CookieSettings;
 	middlewareConfigs?: MiddlewareConfigsOptions;
 }
 
@@ -62,7 +62,7 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
 	refreshTokenKey: secretSchema.optional(),
 	signOptions: Joi.object<SignTokenOptions>().optional(),
 	verifyOptions: Joi.object<VerifyTokenOptions>().optional(),
-	cookieNames: Joi.object<CookieNames>().optional(),
+	cookieSettings: Joi.object<CookieSettings>().optional(),
 	middlewareConfigs: Joi.object<MiddlewareConfigsOptions>().optional(),
 });
 
@@ -85,6 +85,6 @@ export const configure = (options: ConfigOptions) => {
 	if (value.signOptions) setDefaultSignOptions(value.signOptions);
 	if (value.verifyOptions) setDefaultVerifyOptions(value.verifyOptions);
 
-	if (value.cookieNames) cookieNames = value.cookieNames;
+	if (value.cookieSettings) cookieSettings = { ...cookieSettings, ...value.cookieSettings };
 	if (value.middlewareConfigs) middlewareConfigs = { ...middlewareConfigs, ...value.middlewareConfigs };
 };

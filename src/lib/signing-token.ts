@@ -2,7 +2,7 @@ import jsonwebtoken, { JwtHeader } from 'jsonwebtoken';
 import Joi from 'joi';
 
 import { log, logFormat } from './logger';
-import { Algorithm, PrivateKey, Secret, SignTokenOptions } from './custom';
+import { Algorithm, PrivateKey, Secret, SignTokenOptions } from './custom.d';
 
 interface SignTokenParams {
 	payload: string | Buffer | object;

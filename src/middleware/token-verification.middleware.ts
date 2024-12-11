@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 
 import { middlewareConfigs, tokenStorage } from 'src/lib/core';
 import { log } from 'src/lib/logger';
-import { cookieNames } from 'src/lib/core';
+import { cookieSettings } from 'src/lib/core';
 import { appendTokenPayloadToRequest } from 'src/helper/utils';
 import { TokenHandler } from 'src/lib/refresh-token-handler';
 
@@ -10,8 +10,14 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
 	try {
 		const { appendToRequest = [], tokenGenerationHandler } = middlewareConfigs;
 
-		const accessToken = cookieNames.accessToken ? req.cookies[cookieNames.accessToken] : undefined;
-		const refreshToken = cookieNames.refreshToken ? req.cookies[cookieNames.refreshToken] : undefined;
+		const accessToken =
+			req.cookies && cookieSettings.accessTokenCookieName
+				? req.cookies[cookieSettings.accessTokenCookieName]
+				: undefined;
+		const refreshToken =
+			req.cookies && cookieSettings.refreshTokenCookieName
+				? req.cookies[cookieSettings.refreshTokenCookieName]
+				: undefined;
 
 		if (!accessToken && !refreshToken) {
 			throw new Error('Auth cookie not found!');
@@ -33,12 +39,12 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
 
 		appendTokenPayloadToRequest(req, appendToRequest, decodedToken);
 
-		if (cookieNames.accessToken) {
-			res.cookie(cookieNames.accessToken, token, cookieNames.accessTokenOptions || {});
+		if (cookieSettings.accessTokenCookieName) {
+			res.cookie(cookieSettings.accessTokenCookieName, token, cookieSettings.accessCookieOptions || {});
 		}
 
-		if (cookieNames.refreshToken && nextRefreshToken) {
-			res.cookie(cookieNames.refreshToken, nextRefreshToken, cookieNames.refreshTokenOptions || {});
+		if (cookieSettings.refreshTokenCookieName && nextRefreshToken) {
+			res.cookie(cookieSettings.refreshTokenCookieName, nextRefreshToken, cookieSettings.refreshCookieOptions || {});
 		}
 
 		next();

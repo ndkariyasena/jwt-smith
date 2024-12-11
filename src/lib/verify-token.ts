@@ -2,7 +2,7 @@ import jsonwebtoken from 'jsonwebtoken';
 import Joi from 'joi';
 import { log, logFormat } from './logger';
 
-import { VerifyTokenOptions, PublicKey, Secret, VerifyResponse } from './custom';
+import { VerifyTokenOptions, PublicKey, Secret, VerifyResponse } from './custom.d';
 
 interface VerifyTokenParams {
 	token: string;

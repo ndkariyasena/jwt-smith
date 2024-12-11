@@ -5,7 +5,8 @@ import {
 	VerifyResponse,
 	TokenExpiredError,
 	ValidateResponse,
-} from './custom';
+	TokenGenerationHandler,
+} from './custom.d';
 import { publicKey, refreshTokenKey } from 'src/lib/core';
 import { log } from './logger';
 import { verify } from 'src/lib/verify-token';
@@ -13,9 +14,7 @@ import { verify } from 'src/lib/verify-token';
 /* TODO: Next step is to implement the session handling. */
 export class TokenHandler {
 	private refreshTokenStorage: TokenStorage;
-	private tokenGenerationHandler: (
-		refreshTokenPayload: VerifyResponse,
-	) => Promise<{ token: string; refreshToken: string }>;
+	private tokenGenerationHandler: TokenGenerationHandler;
 
 	constructor(options: RefreshTokenHandlerOptions) {
 		this.refreshTokenStorage = options.refreshTokenStorage || new DefaultTokenStorage();
@@ -84,13 +83,13 @@ export class TokenHandler {
 
 		const tokenHolder = await this.refreshTokenStorage.getTokenHolder(refreshToken);
 
-		if (!tokenHolder) {
+		if (!tokenHolder || tokenHolder.id !== userId) {
 			log('warn', 'Could not find a matching token holder for the refresh token.', { refreshToken, userId });
 
-			throw new Error('Could not found a user for the token.');
+			throw new Error('Could not find a user for the token.');
 		}
 
-		const response = await this.tokenGenerationHandler(decodedTokenPayload);
+		const response = await this.tokenGenerationHandler(decodedTokenPayload, tokenHolder);
 
 		await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken);
 

@@ -8,6 +8,7 @@ import { configure } from 'jwt-smith';
 import { AppDataSource } from './db';
 import userRouters from './routes/user';
 import authRouters from './routes/auth';
+import { jwtTokenGenerator } from './helper/jwt-token';
 
 envValidate();
 
@@ -25,8 +26,10 @@ configure({
 		algorithm: 'HS256',
 	},
 	publicKey: process.env.ACCESS_TOKEN_SECRET,
+	refreshTokenKey: process.env.REFRESH_TOKEN_SECRET,
 	middlewareConfigs: {
 		appendToRequest: ['user'],
+		tokenGenerationHandler: jwtTokenGenerator,
 	},
 });
 
