@@ -3,9 +3,11 @@ import { envValidate } from './helper/validator';
 import express from 'express';
 import bodyParser from 'body-parser';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
+
 import { configure } from 'jwt-smith';
 
-import { AppDataSource } from './db';
+import { AppDataSource, TokenRepository } from './db';
 import userRouters from './routes/user';
 import authRouters from './routes/auth';
 import { jwtTokenGenerator } from './helper/jwt-token';
@@ -18,6 +20,7 @@ const HOST = process.env.APP_HOST || 'localhost';
 const app = express();
 
 app.use(cors());
+app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -27,9 +30,13 @@ configure({
 	},
 	publicKey: process.env.ACCESS_TOKEN_SECRET,
 	refreshTokenKey: process.env.REFRESH_TOKEN_SECRET,
+	tokenStorage: new TokenRepository(),
 	middlewareConfigs: {
 		appendToRequest: ['user'],
 		tokenGenerationHandler: jwtTokenGenerator,
+	},
+	cookieSettings: {
+		refreshTokenCookieName: 'refreshToken',
 	},
 });
 

@@ -13,7 +13,7 @@ export const jwtTokenGenerator = async (
 		},
 		secret: process.env.ACCESS_TOKEN_SECRET || '',
 		options: {
-			expiresIn: '1m',
+			expiresIn: '30s',
 		},
 	};
 
@@ -29,7 +29,7 @@ export const jwtTokenGenerator = async (
 		},
 		secret: process.env.REFRESH_TOKEN_SECRET || '',
 		options: {
-			expiresIn: '30m',
+			expiresIn: '2m',
 		},
 	};
 
