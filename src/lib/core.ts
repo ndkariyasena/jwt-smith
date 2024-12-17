@@ -13,7 +13,12 @@ import {
 import { log, logFormat, setLogger } from './logger';
 import { setDefaultSignOptions } from './signing-token';
 import { setDefaultVerifyOptions } from './verify-token';
-import { defaultTokenGenerationHandler, extractAuthHeaderValue } from 'src/helper/utils';
+import {
+	defaultTokenGenerationHandler,
+	extractAuthHeaderValue,
+	refreshTokenHolderVerifier,
+	refreshTokenPayloadVerifier,
+} from 'src/helper/utils';
 
 export let tokenStorage: TokenStorage;
 export let sessionStorage: SessionStorage;
@@ -30,6 +35,8 @@ export let middlewareConfigs: MiddlewareConfigsOptions = {
 	cookies: { accessTokenCookieName: 'accessToken', accessCookieOptions: {}, refreshTokenCookieName: undefined },
 	authTokenExtractor: extractAuthHeaderValue,
 	tokenGenerationHandler: defaultTokenGenerationHandler,
+	refreshTokenPayloadVerifier: refreshTokenPayloadVerifier,
+	refreshTokenHolderVerifier: refreshTokenHolderVerifier,
 };
 
 interface ConfigOptions {

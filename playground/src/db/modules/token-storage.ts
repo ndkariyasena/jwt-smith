@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { ArrayContains, Repository } from 'typeorm';
 import { TokenStorage } from 'jwt-smith';
 
 import { Token } from '../entity/token.entity';
@@ -31,7 +31,7 @@ export default class TokenRepository implements TokenStorage {
 	}
 
 	async getTokenHolder(refreshToken: string): Promise<Record<string, unknown> | null> {
-		let tokenEntity = await this.tokenRepository.findOne({ where: { refreshTokens: refreshToken } });
+		const tokenEntity = await this.tokenRepository.findOne({ where: { refreshTokens: ArrayContains([refreshToken]) } });
 		return tokenEntity ? { id: tokenEntity.userId } : null;
 	}
 

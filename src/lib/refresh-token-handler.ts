@@ -6,19 +6,26 @@ import {
 	TokenExpiredError,
 	ValidateResponse,
 	TokenGenerationHandler,
+	RefreshTokenPayloadVerifier,
+	RefreshTokenHolderVerifier,
 } from './custom.d';
 import { publicKey, refreshTokenKey } from 'src/lib/core';
 import { log } from './logger';
 import { verify } from 'src/lib/verify-token';
+import { refreshTokenHolderVerifier, refreshTokenPayloadVerifier } from 'src/helper/utils';
 
 /* TODO: Next step is to implement the session handling. */
 export class TokenHandler {
 	private refreshTokenStorage: TokenStorage;
 	private tokenGenerationHandler: TokenGenerationHandler;
+	private refreshTokenPayloadVerifier: RefreshTokenPayloadVerifier;
+	private refreshTokenHolderVerifier: RefreshTokenHolderVerifier;
 
 	constructor(options: RefreshTokenHandlerOptions) {
 		this.refreshTokenStorage = options.refreshTokenStorage || new DefaultTokenStorage();
 		this.tokenGenerationHandler = options.tokenGenerationHandler;
+		this.refreshTokenPayloadVerifier = options.refreshTokenPayloadVerifier || refreshTokenPayloadVerifier;
+		this.refreshTokenHolderVerifier = options.refreshTokenHolderVerifier || refreshTokenHolderVerifier;
 
 		if (!options.refreshTokenStorage) {
 			log('warn', '[TokenHandler]: Using default in-memory token storage. This is not recommended for production.');
@@ -41,7 +48,6 @@ export class TokenHandler {
 				if (error instanceof TokenExpiredError && refreshToken) {
 					const response = await this.rotateRefreshToken(refreshToken);
 
-					console.log({ response });
 					token = response.token;
 					nextRefreshToken = response.refreshToken;
 
@@ -50,10 +56,12 @@ export class TokenHandler {
 						secret: publicKey,
 					});
 				} else {
+					log('info', 'Refresh token not found.');
 					throw error;
 				}
 			});
 
+		log('info', 'Auth token validation complete!');
 		return { decodedToken, nextRefreshToken, token };
 	}
 
@@ -81,12 +89,22 @@ export class TokenHandler {
 			throw new Error('Refresh token process failed. User ID not found in the refresh payload.');
 		}
 
+		const [isPayloadValid, validationError] = await this.refreshTokenPayloadVerifier(decodedTokenPayload);
+
+		if (!isPayloadValid) {
+			throw validationError;
+		}
+
 		const tokenHolder = await this.refreshTokenStorage.getTokenHolder(refreshToken);
 
-		if (!tokenHolder || tokenHolder.id !== userId) {
-			log('warn', 'Could not find a matching token holder for the refresh token.', { refreshToken, userId });
+		if (!tokenHolder) {
+			throw new Error('Could not find a matching token holder for the refresh token.');
+		}
 
-			throw new Error('Could not find a user for the token.');
+		const [isHolderVerified, verifyError] = await this.refreshTokenHolderVerifier(tokenHolder, decodedTokenPayload);
+
+		if (!isHolderVerified) {
+			throw verifyError;
 		}
 
 		const response = await this.tokenGenerationHandler(decodedTokenPayload, tokenHolder);

@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
-import { User, UserRepository } from '../db';
+import { TokenRepository, User, UserRepository } from '../db';
 import { jwtTokenGenerator } from '../helper/jwt-token';
+import { COOKIE_TOKEN_EXPIRES_DEFAULT as Default_Expires } from '../common/constants';
 
 export const signUp = async (req: Request, res: Response) => {
 	const userData: User = req.body;
@@ -27,13 +28,11 @@ export const signIn = async (req: Request, res: Response) => {
 	} else {
 		const { token, refreshToken } = await jwtTokenGenerator({}, { id: user.id, role: user.role });
 
-		res.cookie('accessToken', token, {
-			maxAge: 1000 * 60 * 2,
-			httpOnly: true,
-		});
+		const tokenHandler = new TokenRepository();
+		tokenHandler.saveOrUpdateToken(user.id, token, refreshToken);
 
 		res.cookie('refreshToken', refreshToken, {
-			maxAge: 1000 * 60 * 30,
+			maxAge: parseInt(process.env.REFRESH_COOKIE_EXPIRES || Default_Expires, 10),
 			httpOnly: true,
 		});
 

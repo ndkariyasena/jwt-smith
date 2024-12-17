@@ -47,3 +47,26 @@ export const defaultTokenGenerationHandler = async (refreshTokenPayload: VerifyR
 		refreshToken: 'new-refresh-token',
 	};
 };
+
+export const refreshTokenPayloadVerifier = async (tokenPayload: VerifyResponse): Promise<[boolean, Error | null]> => {
+	const userId = tokenPayload.user?.id;
+
+	if (!userId) {
+		return [false, new Error('Refresh token process failed. User ID not found in the refresh payload.')];
+	}
+
+	return [true, null];
+};
+
+export const refreshTokenHolderVerifier = async (
+	tokenHolder: Record<string, unknown>,
+	tokenPayload: VerifyResponse,
+): Promise<[boolean, Error | null]> => {
+	const userId = tokenPayload.user?.id;
+
+	if (tokenHolder.id !== userId) {
+		return [false, new Error('Refresh token payload and token holder data are conflicting.')];
+	}
+
+	return [true, null];
+};

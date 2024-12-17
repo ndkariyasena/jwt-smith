@@ -44,6 +44,13 @@ export type TokenGenerationHandler = (
 	tokenHolder: Record<string, unknown>,
 ) => Promise<{ token: string; refreshToken: string }>;
 
+export type RefreshTokenPayloadVerifier = (refreshTokenPayload: VerifyResponse) => Promise<[boolean, Error | null]>;
+
+export type RefreshTokenHolderVerifier = (
+	tokenHolder: Record<string, unknown>,
+	refreshTokenPayload: VerifyResponse,
+) => Promise<[boolean, Error | null]>;
+
 export interface ValidateResponse {
 	decodedToken: VerifyResponse;
 	nextRefreshToken: string | undefined;
@@ -103,6 +110,8 @@ export interface RefreshTokenHandlerOptions {
 	refreshTokenStorage?: TokenStorage;
 	sessionStorage?: SessionStorage;
 	tokenGenerationHandler: TokenGenerationHandler;
+	refreshTokenPayloadVerifier?: RefreshTokenPayloadVerifier;
+	refreshTokenHolderVerifier?: RefreshTokenHolderVerifier;
 }
 
 export interface CookieSettings {
@@ -125,4 +134,6 @@ export interface MiddlewareConfigsOptions {
 	cookies?: CookieSettings;
 	authTokenExtractor?: (header: string) => string;
 	tokenGenerationHandler: TokenGenerationHandler;
+	refreshTokenPayloadVerifier?: RefreshTokenPayloadVerifier;
+	refreshTokenHolderVerifier?: RefreshTokenHolderVerifier;
 }
