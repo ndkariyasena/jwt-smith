@@ -44,12 +44,12 @@ export type TokenGenerationHandler = (
 	tokenHolder: Record<string, unknown>,
 ) => Promise<{ token: string; refreshToken: string }>;
 
-export type RefreshTokenPayloadVerifier = (refreshTokenPayload: VerifyResponse) => Promise<[boolean, Error | null]>;
+export type RefreshTokenPayloadVerifier = (refreshTokenPayload: VerifyResponse) => Promise<void>;
 
 export type RefreshTokenHolderVerifier = (
 	tokenHolder: Record<string, unknown>,
 	refreshTokenPayload: VerifyResponse,
-) => Promise<[boolean, Error | null]>;
+) => Promise<boolean>;
 
 export interface ValidateResponse {
 	decodedToken: VerifyResponse;
@@ -96,7 +96,7 @@ export interface TokenStorage {
 	saveOrUpdateToken: (userId: string, refreshToken: string, token?: string) => Promise<void>;
 	deleteToken: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
 	getRefreshToken?: (userId: string) => Promise<string | string[] | null>;
-	blackListToken: (token: string, relatedData: Record<string, unknown>) => Promise<void>;
+	blackListToken: (token: string, relatedData?: Record<string, unknown>) => Promise<void>;
 	checkInBlackListedToken: (token: string) => Promise<Record<string, unknown> | undefined>;
 }
 

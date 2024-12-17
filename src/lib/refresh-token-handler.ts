@@ -66,51 +66,60 @@ export class TokenHandler {
 	}
 
 	async rotateRefreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
-		const isBlackListed = await this.refreshTokenStorage.checkInBlackListedToken(refreshToken);
+		try {
+			const isBlackListed = await this.refreshTokenStorage.checkInBlackListedToken(refreshToken);
 
-		if (isBlackListed) {
-			log('error', 'Blacklisted refresh token received!', { refreshToken });
+			if (isBlackListed) {
+				log('error', 'Blacklisted refresh token received!', { refreshToken });
 
-			throw new Error('Blacklisted refresh token found!');
+				throw new Error('Blacklisted refresh token found!');
+			}
+
+			const decodedTokenPayload = await verify({
+				token: refreshToken,
+				secret: refreshTokenKey || publicKey,
+			});
+
+			if (!decodedTokenPayload) {
+				throw new Error('Refresh token payload is undefined!');
+			}
+
+			await this.refreshTokenPayloadVerifier(decodedTokenPayload);
+
+			const tokenHolder = await this.refreshTokenStorage.getTokenHolder(refreshToken);
+
+			if (!tokenHolder) {
+				throw new Error('Could not find a matching token holder for the refresh token.');
+			}
+
+			const isHolderVerified = await this.refreshTokenHolderVerifier(tokenHolder, decodedTokenPayload);
+
+			if (!isHolderVerified) {
+				await this.refreshTokenStorage.blackListToken(refreshToken);
+
+				throw new Error('Refresh token holder verification failed.');
+			}
+
+			const response = await this.tokenGenerationHandler(decodedTokenPayload, tokenHolder);
+
+			const userId = tokenHolder.id || decodedTokenPayload.user?.id;
+
+			await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken);
+
+			return response;
+		} catch (error) {
+			await this.cleanupInvalidRefreshToken(refreshToken);
+
+			throw error;
 		}
+	}
 
-		const decodedTokenPayload = await verify({
-			token: refreshToken,
-			secret: refreshTokenKey || publicKey,
-		});
-
-		if (!decodedTokenPayload) {
-			throw new Error('Refresh token payload is undefined!');
-		}
-
-		const userId = decodedTokenPayload.user?.id;
-
-		if (!userId) {
-			throw new Error('Refresh token process failed. User ID not found in the refresh payload.');
-		}
-
-		const [isPayloadValid, validationError] = await this.refreshTokenPayloadVerifier(decodedTokenPayload);
-
-		if (!isPayloadValid) {
-			throw validationError;
-		}
-
+	async cleanupInvalidRefreshToken(refreshToken: string): Promise<void> {
 		const tokenHolder = await this.refreshTokenStorage.getTokenHolder(refreshToken);
 
-		if (!tokenHolder) {
-			throw new Error('Could not find a matching token holder for the refresh token.');
+		if (tokenHolder && Object.hasOwn(tokenHolder, 'id')) {
+			const userId: string = tokenHolder.id as string;
+			await this.refreshTokenStorage.deleteToken(userId, undefined, refreshToken);
 		}
-
-		const [isHolderVerified, verifyError] = await this.refreshTokenHolderVerifier(tokenHolder, decodedTokenPayload);
-
-		if (!isHolderVerified) {
-			throw verifyError;
-		}
-
-		const response = await this.tokenGenerationHandler(decodedTokenPayload, tokenHolder);
-
-		await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken);
-
-		return response;
 	}
 }
