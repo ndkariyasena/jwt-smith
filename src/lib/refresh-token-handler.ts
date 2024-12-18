@@ -8,22 +8,25 @@ import {
 	TokenGenerationHandler,
 	RefreshTokenPayloadVerifier,
 	RefreshTokenHolderVerifier,
+	AuthTokenPayloadVerifier,
 } from './custom.d';
 import { publicKey, refreshTokenKey } from 'src/lib/core';
 import { log } from './logger';
 import { verify } from 'src/lib/verify-token';
-import { refreshTokenHolderVerifier, refreshTokenPayloadVerifier } from 'src/helper/utils';
+import { authTokenPayloadVerifier, refreshTokenHolderVerifier, refreshTokenPayloadVerifier } from 'src/helper/utils';
 
 /* TODO: Next step is to implement the session handling. */
 export class TokenHandler {
 	private refreshTokenStorage: TokenStorage;
 	private tokenGenerationHandler: TokenGenerationHandler;
+	private authTokenPayloadVerifier: AuthTokenPayloadVerifier;
 	private refreshTokenPayloadVerifier: RefreshTokenPayloadVerifier;
 	private refreshTokenHolderVerifier: RefreshTokenHolderVerifier;
 
 	constructor(options: RefreshTokenHandlerOptions) {
 		this.refreshTokenStorage = options.refreshTokenStorage || new DefaultTokenStorage();
 		this.tokenGenerationHandler = options.tokenGenerationHandler;
+		this.authTokenPayloadVerifier = options.authTokenPayloadVerifier || authTokenPayloadVerifier;
 		this.refreshTokenPayloadVerifier = options.refreshTokenPayloadVerifier || refreshTokenPayloadVerifier;
 		this.refreshTokenHolderVerifier = options.refreshTokenHolderVerifier || refreshTokenHolderVerifier;
 
@@ -32,15 +35,12 @@ export class TokenHandler {
 		}
 	}
 
-	async validateAuthToken(authToken: string, refreshToken: string | undefined): Promise<ValidateResponse> {
+	async validateOrRefreshAuthToken(authToken: string, refreshToken: string | undefined): Promise<ValidateResponse> {
 		let decodedToken: VerifyResponse;
 		let token: string = authToken;
 		let nextRefreshToken: string | undefined = refreshToken;
 
-		await verify({
-			token: authToken,
-			secret: publicKey,
-		})
+		await this.validateAuthToken(authToken)
 			.then((tokenPayload) => {
 				decodedToken = tokenPayload;
 			})
@@ -61,8 +61,19 @@ export class TokenHandler {
 				}
 			});
 
-		log('info', 'Auth token validation complete!');
 		return { decodedToken, nextRefreshToken, token };
+	}
+
+	async validateAuthToken(authToken: string): Promise<VerifyResponse> {
+		const tokenPayload = await verify({
+			token: authToken,
+			secret: publicKey,
+		});
+
+		await this.authTokenPayloadVerifier(tokenPayload);
+
+		log('info', 'Auth token validation complete!');
+		return tokenPayload;
 	}
 
 	async rotateRefreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
@@ -86,7 +97,7 @@ export class TokenHandler {
 
 			await this.refreshTokenPayloadVerifier(decodedTokenPayload);
 
-			const tokenHolder = await this.refreshTokenStorage.getTokenHolder(refreshToken);
+			const tokenHolder = await this.refreshTokenStorage.getRefreshTokenHolder(refreshToken);
 
 			if (!tokenHolder) {
 				throw new Error('Could not find a matching token holder for the refresh token.');
@@ -115,7 +126,7 @@ export class TokenHandler {
 	}
 
 	async cleanupInvalidRefreshToken(refreshToken: string): Promise<void> {
-		const tokenHolder = await this.refreshTokenStorage.getTokenHolder(refreshToken);
+		const tokenHolder = await this.refreshTokenStorage.getRefreshTokenHolder(refreshToken);
 
 		if (tokenHolder && Object.hasOwn(tokenHolder, 'id')) {
 			const userId: string = tokenHolder.id as string;

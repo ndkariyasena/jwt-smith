@@ -45,6 +45,7 @@ export type TokenGenerationHandler = (
 ) => Promise<{ token: string; refreshToken: string }>;
 
 export type RefreshTokenPayloadVerifier = (refreshTokenPayload: VerifyResponse) => Promise<void>;
+export type AuthTokenPayloadVerifier = (tokenPayload: VerifyResponse) => Promise<void>;
 
 export type RefreshTokenHolderVerifier = (
 	tokenHolder: Record<string, unknown>,
@@ -92,7 +93,7 @@ export interface VerifyTokenOptions {
 
 export interface TokenStorage {
 	getToken?: (userId: string) => Promise<string | string[] | null>;
-	getTokenHolder: (refreshToken: string) => Promise<Record<string, unknown> | null>;
+	getRefreshTokenHolder: (refreshToken: string) => Promise<Record<string, unknown> | null>;
 	saveOrUpdateToken: (userId: string, refreshToken: string, token?: string) => Promise<void>;
 	deleteToken: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
 	getRefreshToken?: (userId: string) => Promise<string | string[] | null>;
@@ -110,6 +111,7 @@ export interface RefreshTokenHandlerOptions {
 	refreshTokenStorage?: TokenStorage;
 	sessionStorage?: SessionStorage;
 	tokenGenerationHandler: TokenGenerationHandler;
+	authTokenPayloadVerifier?: AuthTokenPayloadVerifier;
 	refreshTokenPayloadVerifier?: RefreshTokenPayloadVerifier;
 	refreshTokenHolderVerifier?: RefreshTokenHolderVerifier;
 }
@@ -134,6 +136,7 @@ export interface MiddlewareConfigsOptions {
 	cookies?: CookieSettings;
 	authTokenExtractor?: (header: string) => string;
 	tokenGenerationHandler: TokenGenerationHandler;
+	authTokenPayloadVerifier?: AuthTokenPayloadVerifier;
 	refreshTokenPayloadVerifier?: RefreshTokenPayloadVerifier;
 	refreshTokenHolderVerifier?: RefreshTokenHolderVerifier;
 }

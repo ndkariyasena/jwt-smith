@@ -28,7 +28,7 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
 			tokenGenerationHandler: tokenGenerationHandler,
 		});
 
-		const { decodedToken, nextRefreshToken, token } = await refreshTokenHandler.validateAuthToken(
+		const { decodedToken, nextRefreshToken, token } = await refreshTokenHandler.validateOrRefreshAuthToken(
 			accessToken,
 			refreshToken,
 		);

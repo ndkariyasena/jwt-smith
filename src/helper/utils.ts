@@ -41,11 +41,17 @@ export const appendTokenPayloadToRequest = (
 };
 
 export const defaultTokenGenerationHandler = async (refreshTokenPayload: VerifyResponse) => {
-	console.log({ refreshTokenPayload });
+	console.debug({ refreshTokenPayload });
 	return {
 		token: 'new-token',
 		refreshToken: 'new-refresh-token',
 	};
+};
+
+export const authTokenPayloadVerifier = async (tokenPayload: VerifyResponse): Promise<void> => {
+	if (!tokenPayload) {
+		throw new Error('Empty payload in the auth token.');
+	}
 };
 
 export const refreshTokenPayloadVerifier = async (tokenPayload: VerifyResponse): Promise<void> => {

@@ -5,7 +5,6 @@ export const jwtTokenGenerator = async (
 	decodedRefreshToken: VerifyResponse,
 	user: Record<string, unknown>,
 ): Promise<{ token: string; refreshToken: string }> => {
-	console.log('--- jwtTokenGenerator');
 	const tokenPayload = {
 		payload: {
 			user: {
@@ -34,10 +33,6 @@ export const jwtTokenGenerator = async (
 			expiresIn: parseInt(process.env.REFRESH_TOKEN_EXPIRES || Default_Expires, 10),
 		},
 	};
-	console.log({
-		a: parseInt(process.env.ACCESS_TOKEN_EXPIRES || Default_Expires, 10),
-		r: parseInt(process.env.REFRESH_TOKEN_EXPIRES || Default_Expires, 10),
-	});
 
 	const refreshToken = await sign(refreshTokenPayload);
 

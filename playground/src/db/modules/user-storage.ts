@@ -33,8 +33,6 @@ export default class UserRepository {
 	}
 
 	async updateUser(userId: string, userData: User): Promise<void> {
-		const result = await this.userRepository.update(userId, userData);
-
-		console.log(result);
+		await this.userRepository.update(userId, userData);
 	}
 }

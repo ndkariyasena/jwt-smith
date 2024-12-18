@@ -27,7 +27,7 @@ export default class DefaultTokenStorage implements TokenStorage {
 		this.tokens.set(userId, update);
 	}
 
-	async getTokenHolder(refreshToken: string): Promise<Record<string, unknown> | null> {
+	async getRefreshTokenHolder(refreshToken: string): Promise<Record<string, unknown> | null> {
 		let holder = null;
 
 		this.tokens.forEach((data, userId) => {
