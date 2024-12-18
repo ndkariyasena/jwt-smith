@@ -25,7 +25,7 @@ export const appendTokenPayloadToRequest = (
 		typeof decodedTokenPayload !== 'string'
 	) {
 		try {
-			const castedPayload = decodedTokenPayload as unknown as Record<string, unknown>;
+			const castedPayload = decodedTokenPayload;
 
 			appendToRequest.forEach((item: AppendToRequestProperties) => {
 				if (Object.hasOwn(castedPayload, item)) {

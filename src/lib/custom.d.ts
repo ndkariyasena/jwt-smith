@@ -39,6 +39,12 @@ export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPay
 
 export type AppendToRequest = AppendToRequestProperties[] | true;
 
+export interface AuthUser {
+	id?: string | number;
+	role?: string;
+	[key: string]: unknown;
+}
+
 export type TokenGenerationHandler = (
 	refreshTokenPayload: VerifyResponse,
 	tokenHolder: Record<string, unknown>,
@@ -124,10 +130,10 @@ export interface CookieSettings {
 }
 
 export interface AuthedRequest extends Request {
-	user?: unknown;
-	role?: unknown;
-	language?: unknown;
-	tokenPayload?: unknown;
+	user?: AuthUser;
+	role?: string;
+	language?: string | string[];
+	tokenPayload?: Record<string, unknown> | unknown;
 }
 
 export interface MiddlewareConfigsOptions {
