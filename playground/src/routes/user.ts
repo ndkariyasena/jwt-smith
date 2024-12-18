@@ -1,14 +1,11 @@
 import { Router } from 'express';
 import { getUserById, listUsers } from '../controller/user.controller';
-import { validateJwtHeaderMiddleware } from 'jwt-smith';
+import { roleBasedAuthenticationMiddleware, validateJwtHeaderMiddleware } from 'jwt-smith';
 
 const router = Router();
 
-router.route('/').get(validateJwtHeaderMiddleware, listUsers);
+router.route('/').get(validateJwtHeaderMiddleware, roleBasedAuthenticationMiddleware('user:list'), listUsers);
 
-router.route('/:id').get((req, res) => {
-	console.log(Object.keys(req.header));
-	console.log(Object.keys(req.headers));
-}, getUserById);
+router.route('/:id').get(validateJwtHeaderMiddleware, getUserById);
 
 export default router;

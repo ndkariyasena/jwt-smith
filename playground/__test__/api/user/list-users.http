@@ -12,13 +12,6 @@ Content-Type: application/json
 @authToken = {{signin.response.body.$.token}}
 @refreshToken = {{signin.response.headers.Set-Cookie}}
 
-# @name listUsers-only_token
-GET http://localhost:3001/user/
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-###
-
 # @name listUsers-including_refreshToken
 
 GET http://localhost:3001/user/

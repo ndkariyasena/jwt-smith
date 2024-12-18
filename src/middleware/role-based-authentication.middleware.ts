@@ -52,82 +52,82 @@ const getPermissionConfigs = async () => {
 		throw e;
 	});
 
-	return JSON.parse(await fs.readFile('./permissions.json', 'utf-8'));
+	return JSON.parse(await fs.readFile(RolePermissionConfigFilePath, 'utf-8'));
 };
 
-export const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
-	return async (req: AuthedRequest, res: Response, next: NextFunction) => {
+const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
+	return async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {
 		const { user, role } = req;
 		const userRole = user && Object.hasOwn(user, 'role') ? user.role : role;
 		const endpointPath = req.path;
 		const method = req.method;
 
 		if (!userRole) {
-			return res.status(403).json({ error: 'Access denied. Role not found.' });
-		}
+			res.status(403).json({ error: 'Access denied. Role not found.' });
+		} else {
+			const permissionsConfig: PermissionsConfiguration = await getPermissionConfigs();
 
-		const permissionsConfig: PermissionsConfiguration = await getPermissionConfigs();
+			const { error } = permissionsConfigSchema.validate(permissionsConfig);
 
-		const { error } = permissionsConfigSchema.validate(permissionsConfig);
+			if (error) {
+				log('error', "Auth Permissions config file's validation failed.", error);
 
-		if (error) {
-			log('error', "Auth Permissions config file's validation failed.", error);
+				throw error;
+			}
 
-			throw error;
-		}
+			if (!permissionsConfig.common && !permissionsConfig.groups && !permissionsConfig.endpoints) {
+				log('error', 'At least one permission set should be in the configs.');
 
-		if (!permissionsConfig.common && !permissionsConfig.groups && !permissionsConfig.endpoints) {
-			log('error', 'At least one permission set should be in the configs.');
+				throw new Error('Permission configurations is empty.');
+			}
 
-			throw new Error('Permission configurations is empty.');
-		}
+			/* Match standalone endpoints. */
+			if (permissionsConfig.endpoints) {
+				const standaloneEndpoint = permissionsConfig.endpoints.find(
+					(ep: EndPointsPermissionConfig) => ep.path === endpointPath && ep.methods.includes(method),
+				);
 
-		/* Match standalone endpoints. */
-		if (permissionsConfig.endpoints) {
-			const standaloneEndpoint = permissionsConfig.endpoints.find(
-				(ep: EndPointsPermissionConfig) => ep.path === endpointPath && ep.methods.includes(method),
-			);
+				if (standaloneEndpoint) {
+					if (checkPermissions(userRole, requiredAction, [], standaloneEndpoint.permissions)) {
+						return next();
+					}
+				}
+			}
 
-			if (standaloneEndpoint) {
-				if (checkPermissions(userRole, requiredAction, [], standaloneEndpoint.permissions)) {
+			/* Match group-based routes. */
+			if (permissionsConfig.groups) {
+				const groups: EndPointConfig[] = Object.values(permissionsConfig.groups);
+				const matchedGroup = groups.find(
+					(group: EndPointConfig) =>
+						endpointPath.startsWith(group.basePath) &&
+						group.endpoints.some((ep: EndPointsPermissionConfig) => ep.path === endpointPath),
+				);
+
+				if (matchedGroup) {
+					const groupPermissions = matchedGroup.permissions || [];
+					const endpointPermissions =
+						matchedGroup.endpoints.find(
+							(ep: EndPointsPermissionConfig) => ep.path === endpointPath && ep.methods.includes(method),
+						)?.permissions || [];
+
+					if (checkPermissions(userRole, requiredAction, groupPermissions, endpointPermissions)) {
+						return next();
+					}
+				}
+			}
+
+			/* Check common permissions. */
+			if (permissionsConfig.common) {
+				const commonRoles = permissionsConfig.common.roles || [];
+				const commonRole = commonRoles.find((role: RolesSet) => role.name === userRole);
+				if (commonRole && commonRole.permissions.includes('*:*')) {
+					/* Full access granted. */
 					return next();
 				}
 			}
+
+			res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
 		}
-
-		/* Match group-based routes. */
-		if (permissionsConfig.groups) {
-			const groups: EndPointConfig[] = Object.values(permissionsConfig.groups);
-			const matchedGroup = groups.find(
-				(group: EndPointConfig) =>
-					endpointPath.startsWith(group.basePath) &&
-					group.endpoints.some((ep: EndPointsPermissionConfig) => ep.path === endpointPath),
-			);
-
-			if (matchedGroup) {
-				const groupPermissions = matchedGroup.permissions || [];
-				const endpointPermissions =
-					matchedGroup.endpoints.find(
-						(ep: EndPointsPermissionConfig) => ep.path === endpointPath && ep.methods.includes(method),
-					)?.permissions || [];
-
-				if (checkPermissions(userRole, requiredAction, groupPermissions, endpointPermissions)) {
-					return next();
-				}
-			}
-		}
-
-		/* Check common permissions. */
-		if (permissionsConfig.common) {
-			const commonRoles = permissionsConfig.common.roles || [];
-			const commonRole = commonRoles.find((role: RolesSet) => role.name === userRole);
-			if (commonRole && commonRole.permissions.includes('*:*')) {
-				/* Full access granted. */
-				return next();
-			}
-		}
-
-		return res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
 	};
 };
 
@@ -146,3 +146,5 @@ function checkPermissions(
 		return false;
 	});
 }
+
+export default roleBasedAuthenticationMiddleware;
