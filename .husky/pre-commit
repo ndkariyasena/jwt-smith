@@ -1,1 +1,7 @@
-npx lint-staged
+# .husky/pre-commit
+ORNG='\033[0;33m'
+NC='\033[0m' # No Color
+echo "${ORNG}Starting the Pre-commit hooks...${NC}"
+prettier $(git diff --cached --name-only --diff-filter=ACMR | sed 's| |\\ |g') --write --ignore-unknown
+git update-index --again
+echo "${ORNG}Pre-commit hooks completed!${NC}"

@@ -1,0 +1,20 @@
+# @name signin
+POST http://localhost:3001/auth/signin
+Content-Type: application/json
+
+{
+  "email": "tester2@test.com",
+  "password": "supperPassword123",
+  "name": "Mr Tester"
+}
+
+###
+@authToken = {{signin.response.body.$.token}}
+@refreshToken = {{signin.response.headers.Set-Cookie}}
+
+# @name listUsers-including_refreshToken
+
+GET http://localhost:3001/user/
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+Cookie: {{refreshToken}}

@@ -1,6 +1,5 @@
 import { sign } from '../src/lib/signing-token';
 import { verify } from '../src/lib/verify-token';
-// import { JsonWebTokenError } from "../src/lib/core.d";
 
 import { JsonWebTokenError } from 'jsonwebtoken';
 
@@ -36,16 +35,16 @@ describe('Token "verify" method related tests.', () => {
 		};
 
 		const token = await sign(signParams);
-    expect(typeof token).toBe('string');
+		expect(typeof token).toBe('string');
 
 		const verifyParams = {
-      token: `${token}x`,
-      secret,
-    };
+			token: `${token}x`,
+			secret,
+		};
 
-    await verify(verifyParams).catch((error) => {
-      expect(error).not.toBeNull();
-      expect(error instanceof JsonWebTokenError).toBe(true);
-    });
+		await verify(verifyParams).catch((error) => {
+			expect(error).not.toBeNull();
+			expect(error instanceof JsonWebTokenError).toBe(true);
+		});
 	});
 });
