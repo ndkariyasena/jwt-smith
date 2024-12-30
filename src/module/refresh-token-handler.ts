@@ -1,17 +1,16 @@
 import DefaultTokenStorage from 'src/module/token-storage';
 import {
 	TokenStorage,
-	RefreshTokenHandlerOptions,
 	VerifyResponse,
 	TokenExpiredError,
-	ValidateResponse,
 	TokenGenerationHandler,
 	RefreshTokenPayloadVerifier,
 	RefreshTokenHolderVerifier,
 	AuthTokenPayloadVerifier,
-} from './custom.d';
+} from 'src/lib/custom.d';
+import { RefreshTokenHandlerOptions, ValidateResponse } from './internal';
 import { publicKey, refreshTokenKey } from 'src/lib/core';
-import { log } from './logger';
+import { log } from 'src/lib/logger';
 import { verify } from 'src/lib/verify-token';
 import { authTokenPayloadVerifier, refreshTokenHolderVerifier, refreshTokenPayloadVerifier } from 'src/helper/utils';
 

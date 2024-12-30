@@ -33,3 +33,18 @@ export interface PermissionsConfiguration {
 	groups: GroupedRoutesPermissionConfig;
 	endpoints: EndPointsPermissionConfig[];
 }
+
+export interface ValidateResponse {
+	decodedToken: VerifyResponse;
+	nextRefreshToken: string | undefined;
+	token: string;
+}
+
+export interface RefreshTokenHandlerOptions {
+	refreshTokenStorage?: TokenStorage;
+	sessionStorage?: SessionStorage;
+	tokenGenerationHandler: TokenGenerationHandler;
+	authTokenPayloadVerifier?: AuthTokenPayloadVerifier;
+	refreshTokenPayloadVerifier?: RefreshTokenPayloadVerifier;
+	refreshTokenHolderVerifier?: RefreshTokenHolderVerifier;
+}

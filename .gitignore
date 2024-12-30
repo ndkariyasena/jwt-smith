@@ -131,3 +131,6 @@ dist
 
 # vscode configs
 .vscode
+
+# Local scripts
+.local-scripts

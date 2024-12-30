@@ -11,7 +11,7 @@ import {
 	PermissionsConfiguration,
 	PermissionsSet,
 	RolesSet,
-} from 'src/lib/internal';
+} from 'src/module/internal';
 import { middlewareConfigs } from 'src/lib/core';
 
 const permissionSchema = Joi.object({
@@ -64,7 +64,7 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 
 		const { user, role } = req;
 		const userRole = user && Object.hasOwn(user, 'role') ? user.role : role;
-		const endpointPath = req.path;
+		const endpointPath = req.baseUrl;
 		const method = req.method;
 
 		let requestVersion = undefined;

@@ -1,5 +1,8 @@
 import { Request, CookieOptions } from 'express';
 import { JsonWebKeyInput, KeyObject, PrivateKeyInput, PublicKeyInput } from 'node:crypto';
+import { Jwt, JwtPayload, JwtHeader } from 'jsonwebtoken';
+
+export { JsonWebTokenError, TokenExpiredError, NotBeforeError } from 'jsonwebtoken';
 
 export interface Logger {
 	info: (message: string, ...args: unknown[]) => void;
@@ -7,8 +10,6 @@ export interface Logger {
 	error: (message: string, ...args: unknown[]) => void;
 	debug: (message: string, ...args: unknown[]) => void;
 }
-
-export { JsonWebTokenError, TokenExpiredError, NotBeforeError } from 'jsonwebtoken';
 
 export type Secret = string | Buffer | KeyObject | { key: string | Buffer; passphrase: string };
 
@@ -33,7 +34,7 @@ export type PublicKey = PublicKeyInput | string | Buffer | KeyObject | JsonWebKe
 
 export type Session = string | string[] | Record<string, unknown> | Record<string, unknown>[];
 
-export type VerifyResponse = string | Jwt | JwtPayload | undefined;
+export type VerifyResponse = string | Jwt | JwtPayload | Record<string, unknown> | undefined;
 
 export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPayload';
 
@@ -51,6 +52,7 @@ export type TokenGenerationHandler = (
 ) => Promise<{ token: string; refreshToken: string }>;
 
 export type RefreshTokenPayloadVerifier = (refreshTokenPayload: VerifyResponse) => Promise<void>;
+
 export type AuthTokenPayloadVerifier = (tokenPayload: VerifyResponse) => Promise<void>;
 
 export type RefreshTokenHolderVerifier = (
@@ -59,12 +61,6 @@ export type RefreshTokenHolderVerifier = (
 ) => Promise<boolean>;
 
 export type ExtractApiVersion = (request: AuthedRequest) => Promise<string | undefined>;
-
-export interface ValidateResponse {
-	decodedToken: VerifyResponse;
-	nextRefreshToken: string | undefined;
-	token: string;
-}
 
 export interface SignTokenOptions {
 	algorithm?: Algorithm | undefined;
@@ -113,15 +109,6 @@ export interface SessionStorage {
 	getSession: (sessionId: string) => Promise<Session | null>;
 	saveSession: (sessionId: string, session: Session) => Promise<void>;
 	deleteSession: (sessionId: string) => Promise<void>;
-}
-
-export interface RefreshTokenHandlerOptions {
-	refreshTokenStorage?: TokenStorage;
-	sessionStorage?: SessionStorage;
-	tokenGenerationHandler: TokenGenerationHandler;
-	authTokenPayloadVerifier?: AuthTokenPayloadVerifier;
-	refreshTokenPayloadVerifier?: RefreshTokenPayloadVerifier;
-	refreshTokenHolderVerifier?: RefreshTokenHolderVerifier;
 }
 
 export interface CookieSettings {

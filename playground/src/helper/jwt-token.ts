@@ -20,12 +20,17 @@ export const jwtTokenGenerator = async (
 
 	const token = await sign(tokenPayload);
 
+	let prevId = undefined;
+	if (decodedRefreshToken && typeof decodedRefreshToken !== 'string') {
+		prevId = (decodedRefreshToken as unknown as Record<string, unknown>).id;
+	}
+
 	const refreshTokenPayload = {
 		payload: {
 			user: {
 				id: user.id,
 			},
-			prevId: decodedRefreshToken?.id || undefined,
+			prevId,
 			id: new Date().getTime(),
 		},
 		secret: process.env.REFRESH_TOKEN_SECRET || '',
