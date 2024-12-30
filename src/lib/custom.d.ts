@@ -58,6 +58,8 @@ export type RefreshTokenHolderVerifier = (
 	refreshTokenPayload: VerifyResponse,
 ) => Promise<boolean>;
 
+export type ExtractApiVersion = (request: AuthedRequest) => Promise<string | undefined>;
+
 export interface ValidateResponse {
 	decodedToken: VerifyResponse;
 	nextRefreshToken: string | undefined;
@@ -145,4 +147,5 @@ export interface MiddlewareConfigsOptions {
 	authTokenPayloadVerifier?: AuthTokenPayloadVerifier;
 	refreshTokenPayloadVerifier?: RefreshTokenPayloadVerifier;
 	refreshTokenHolderVerifier?: RefreshTokenHolderVerifier;
+	extractApiVersion?: ExtractApiVersion;
 }

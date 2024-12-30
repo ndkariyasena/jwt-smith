@@ -15,6 +15,7 @@ import { setDefaultSignOptions } from './signing-token';
 import { setDefaultVerifyOptions } from './verify-token';
 import {
 	defaultTokenGenerationHandler,
+	extractApiVersion,
 	extractAuthHeaderValue,
 	refreshTokenHolderVerifier,
 	refreshTokenPayloadVerifier,
@@ -37,6 +38,7 @@ export let middlewareConfigs: MiddlewareConfigsOptions = {
 	tokenGenerationHandler: defaultTokenGenerationHandler,
 	refreshTokenPayloadVerifier: refreshTokenPayloadVerifier,
 	refreshTokenHolderVerifier: refreshTokenHolderVerifier,
+	extractApiVersion: extractApiVersion,
 };
 
 interface ConfigOptions {

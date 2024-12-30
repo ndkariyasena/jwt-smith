@@ -12,6 +12,7 @@ import {
 	PermissionsSet,
 	RolesSet,
 } from 'src/lib/internal';
+import { middlewareConfigs } from 'src/lib/core';
 
 const permissionSchema = Joi.object({
 	roles: Joi.array().items(Joi.string().required()).required(),
@@ -19,6 +20,8 @@ const permissionSchema = Joi.object({
 });
 
 const endpointSchema = Joi.object({
+	versioned: Joi.boolean().optional(),
+	activeVersions: Joi.array().items(Joi.string().required()).optional(),
 	path: Joi.string().required(),
 	methods: Joi.array()
 		.items(Joi.string().valid('GET', 'POST', 'PUT', 'PATCH', 'DELETE'))
@@ -57,10 +60,24 @@ const getPermissionConfigs = async () => {
 
 const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 	return async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {
+		const { extractApiVersion } = middlewareConfigs;
+
 		const { user, role } = req;
 		const userRole = user && Object.hasOwn(user, 'role') ? user.role : role;
 		const endpointPath = req.path;
 		const method = req.method;
+
+		let requestVersion = undefined;
+
+		if (extractApiVersion) {
+			const version = await extractApiVersion(req);
+
+			if (version) {
+				requestVersion = version;
+			}
+		}
+
+		log('debug', `API version extracted from the request: ${requestVersion}`);
 
 		if (!userRole) {
 			res.status(403).json({ error: 'Access denied. Role not found.' });
@@ -79,6 +96,15 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 				log('error', 'At least one permission set should be in the configs.');
 
 				throw new Error('Permission configurations is empty.');
+			}
+
+			if (permissionsConfig.versioned) {
+				if (!requestVersion) {
+					res.status(400).json({ error: 'Access denied. Insufficient permissions.' });
+				}
+				if (requestVersion && !permissionsConfig.activeVersions?.includes(requestVersion)) {
+					res.status(400).json({ error: 'Unsupported API version.' });
+				}
 			}
 
 			/* Match standalone endpoints. */

@@ -27,6 +27,8 @@ export interface CommonPermissionConfig {
 }
 
 export interface PermissionsConfiguration {
+	versioned?: boolean;
+	activeVersions?: string[];
 	common: CommonPermissionConfig;
 	groups: GroupedRoutesPermissionConfig;
 	endpoints: EndPointsPermissionConfig[];
