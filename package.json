@@ -13,6 +13,8 @@
 		"lint:package": "eslint . --ignore-pattern 'dist/*' --ignore-pattern '*/**/**.mjs' --ignore-pattern 'playground/*' --ignore-pattern 'test/*'",
 		"lint:playground": "eslint . --ignore-pattern 'dist/*' --ignore-pattern '*/**/**.mjs' --ignore-pattern 'src/*' --ignore-pattern 'test/*'",
 		"prepare": "husky",
+		"release:notes": "changeset",
+		"release:prepare": "changeset version",
 		"release": "npm run build && changeset publish",
 		"test": "jest",
 		"test:watch": "jest --watch",
