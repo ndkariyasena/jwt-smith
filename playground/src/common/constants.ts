@@ -1,1 +1,1 @@
-export const COOKIE_TOKEN_EXPIRES_DEFAULT: string = '60000';
+export const COOKIE_TOKEN_EXPIRES_DEFAULT = '60000';

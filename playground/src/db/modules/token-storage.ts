@@ -50,10 +50,11 @@ export default class TokenRepository implements TokenStorage {
 	}
 
 	async blackListToken(token: string, relatedData?: Record<string, unknown>): Promise<void> {
-		console.log('blackListToken');
+		console.debug(`Blacklisting token: ${token} : ${JSON.stringify(relatedData)}`);
 	}
 
 	async checkInBlackListedToken(token: string): Promise<Record<string, unknown> | undefined> {
+		console.debug(`Checking token in blacklist: ${token}`);
 		return undefined;
 	}
 }
