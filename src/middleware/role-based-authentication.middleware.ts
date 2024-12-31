@@ -20,8 +20,6 @@ const permissionSchema = Joi.object({
 });
 
 const endpointSchema = Joi.object({
-	versioned: Joi.boolean().optional(),
-	activeVersions: Joi.array().items(Joi.string().required()).optional(),
 	path: Joi.string().required(),
 	methods: Joi.array()
 		.items(Joi.string().valid('GET', 'POST', 'PUT', 'PATCH', 'DELETE'))
@@ -41,6 +39,8 @@ const commonRolesSchema = Joi.object({
 });
 
 const permissionsConfigSchema = Joi.object({
+	versioned: Joi.boolean().optional(),
+	activeVersions: Joi.array().items(Joi.string().required()).optional(),
 	common: Joi.object({
 		roles: Joi.array().items(commonRolesSchema).required(),
 	}).optional(),
@@ -68,6 +68,7 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 		const method = req.method;
 
 		let requestVersion = undefined;
+		let versionValidationError: string | undefined = undefined;
 
 		if (extractApiVersion) {
 			const version = await extractApiVersion(req);
@@ -100,59 +101,63 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 
 			if (permissionsConfig.versioned) {
 				if (!requestVersion) {
-					res.status(400).json({ error: 'Access denied. Insufficient permissions.' });
+					versionValidationError = 'Access denied. Insufficient permissions.';
 				}
 				if (requestVersion && !permissionsConfig.activeVersions?.includes(requestVersion)) {
-					res.status(400).json({ error: 'Unsupported API version.' });
+					versionValidationError = 'Unsupported API version.';
 				}
 			}
 
-			/* Match standalone endpoints. */
-			if (permissionsConfig.endpoints) {
-				const standaloneEndpoint = permissionsConfig.endpoints.find(
-					(ep: EndPointsPermissionConfig) => ep.path === endpointPath && ep.methods.includes(method),
-				);
+			if (versionValidationError) {
+				res.status(400).json({ error: versionValidationError });
+			} else {
+				/* Match standalone endpoints. */
+				if (permissionsConfig.endpoints) {
+					const standaloneEndpoint = permissionsConfig.endpoints.find(
+						(ep: EndPointsPermissionConfig) => ep.path === endpointPath && ep.methods.includes(method),
+					);
 
-				if (standaloneEndpoint) {
-					if (checkPermissions(userRole, requiredAction, [], standaloneEndpoint.permissions)) {
+					if (standaloneEndpoint) {
+						if (checkPermissions(userRole, requiredAction, [], standaloneEndpoint.permissions)) {
+							return next();
+						}
+					}
+				}
+
+				/* Match group-based routes. */
+				if (permissionsConfig.groups) {
+					const groups: EndPointConfig[] = Object.values(permissionsConfig.groups);
+					const matchedGroup = groups.find(
+						(group: EndPointConfig) =>
+							endpointPath.startsWith(group.basePath) &&
+							group.endpoints.some((ep: EndPointsPermissionConfig) => ep.path === endpointPath),
+					);
+
+					if (matchedGroup) {
+						const groupPermissions = matchedGroup.permissions || [];
+						const endpointPermissions =
+							matchedGroup.endpoints.find(
+								(ep: EndPointsPermissionConfig) => ep.path === endpointPath && ep.methods.includes(method),
+							)?.permissions || [];
+
+						if (checkPermissions(userRole, requiredAction, groupPermissions, endpointPermissions)) {
+							return next();
+						}
+					}
+				}
+
+				/* Check common permissions. */
+				if (permissionsConfig.common) {
+					const commonRoles = permissionsConfig.common.roles || [];
+					const commonRole = commonRoles.find((role: RolesSet) => role.name === userRole);
+					if (commonRole && commonRole.permissions.includes('*:*')) {
+						/* Full access granted. */
 						return next();
 					}
 				}
+
+				res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
 			}
-
-			/* Match group-based routes. */
-			if (permissionsConfig.groups) {
-				const groups: EndPointConfig[] = Object.values(permissionsConfig.groups);
-				const matchedGroup = groups.find(
-					(group: EndPointConfig) =>
-						endpointPath.startsWith(group.basePath) &&
-						group.endpoints.some((ep: EndPointsPermissionConfig) => ep.path === endpointPath),
-				);
-
-				if (matchedGroup) {
-					const groupPermissions = matchedGroup.permissions || [];
-					const endpointPermissions =
-						matchedGroup.endpoints.find(
-							(ep: EndPointsPermissionConfig) => ep.path === endpointPath && ep.methods.includes(method),
-						)?.permissions || [];
-
-					if (checkPermissions(userRole, requiredAction, groupPermissions, endpointPermissions)) {
-						return next();
-					}
-				}
-			}
-
-			/* Check common permissions. */
-			if (permissionsConfig.common) {
-				const commonRoles = permissionsConfig.common.roles || [];
-				const commonRole = commonRoles.find((role: RolesSet) => role.name === userRole);
-				if (commonRole && commonRole.permissions.includes('*:*')) {
-					/* Full access granted. */
-					return next();
-				}
-			}
-
-			res.status(403).json({ error: 'Access denied. Insufficient permissions.' });
 		}
 	};
 };

@@ -16,7 +16,7 @@ Content-Type: application/json
 
 # @name listUsers-including_refreshToken
 
-GET http://localhost:3001/user/1
+GET http://localhost:3001/users/1
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 Cookie: {{refreshToken}}

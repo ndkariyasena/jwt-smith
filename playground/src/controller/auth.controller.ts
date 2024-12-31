@@ -4,6 +4,7 @@ import { jwtTokenGenerator } from '../helper/jwt-token';
 import { COOKIE_TOKEN_EXPIRES_DEFAULT as Default_Expires } from '../common/constants';
 
 export const signUp = async (req: Request, res: Response) => {
+	console.log('[Playground] SignUp endpoint hit successfully!');
 	const userData: User = req.body;
 	const user = new UserRepository();
 
@@ -19,6 +20,7 @@ export const signUp = async (req: Request, res: Response) => {
 };
 
 export const signIn = async (req: Request, res: Response) => {
+	console.log('[Playground] SignIn endpoint hit successfully!');
 	const { email, password } = req.body;
 	const userRepo = new UserRepository();
 	const user = await userRepo.getUser({ email });
@@ -41,5 +43,6 @@ export const signIn = async (req: Request, res: Response) => {
 };
 
 export const signOut = async (req: Request, res: Response) => {
+	console.log('[Playground] SignOut endpoint hit successfully!');
 	res.send('signOut');
 };

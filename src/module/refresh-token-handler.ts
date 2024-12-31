@@ -112,7 +112,11 @@ export class TokenHandler {
 
 			const response = await this.tokenGenerationHandler(decodedTokenPayload, tokenHolder);
 
-			const userId = tokenHolder.id || decodedTokenPayload.user?.id;
+			const userId =
+				tokenHolder.id ||
+				(typeof decodedTokenPayload !== 'string' && 'user' in decodedTokenPayload
+					? decodedTokenPayload.user?.id
+					: undefined);
 
 			await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken);
 

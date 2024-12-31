@@ -34,7 +34,7 @@ export type PublicKey = PublicKeyInput | string | Buffer | KeyObject | JsonWebKe
 
 export type Session = string | string[] | Record<string, unknown> | Record<string, unknown>[];
 
-export type VerifyResponse = string | Jwt | JwtPayload | Record<string, unknown> | undefined;
+export type VerifyResponse = string | Jwt | JwtPayload | undefined;
 
 export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPayload';
 
@@ -118,12 +118,14 @@ export interface CookieSettings {
 	refreshCookieOptions?: CookieOptions;
 }
 
-export interface AuthedRequest extends Request {
+export interface RequestAppends {
 	user?: AuthUser;
 	role?: string;
 	language?: string | string[];
-	tokenPayload?: Record<string, unknown> | unknown;
+	tokenPayload?: Record<string, unknown> | unknown | undefined;
 }
+
+export type AuthedRequest = RequestAppends & Request;
 
 export interface MiddlewareConfigsOptions {
 	authHeaderName?: string;

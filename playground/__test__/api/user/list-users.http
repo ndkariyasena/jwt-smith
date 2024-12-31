@@ -3,9 +3,9 @@ POST http://localhost:3001/auth/signin
 Content-Type: application/json
 
 {
-  "email": "tester2@test.com",
+  "email": "tester3@test.com",
   "password": "supperPassword123",
-  "name": "Mr Tester"
+  "name": "Mr Admin"
 }
 
 ###
@@ -14,7 +14,8 @@ Content-Type: application/json
 
 # @name listUsers-including_refreshToken
 
-GET http://localhost:3001/user/
+GET http://localhost:3001/users/
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
+api-version: v1
 Cookie: {{refreshToken}}
