@@ -95,6 +95,16 @@
 					"actions": ["auth:logout"]
 				}
 			]
+		},
+		{
+			"path": "/users",
+			"methods": ["GET"],
+			"permissions": [
+				{
+					"roles": ["Admin", "Viewer", "Editor"],
+					"actions": ["user:list"]
+				}
+			]
 		}
 	]
 }

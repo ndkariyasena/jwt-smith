@@ -31,8 +31,11 @@ export default class TokenRepository implements TokenStorage {
 	}
 
 	async getRefreshTokenHolder(refreshToken: string): Promise<Record<string, unknown> | null> {
-		const tokenEntity = await this.tokenRepository.findOne({ where: { refreshTokens: ArrayContains([refreshToken]) } });
-		return tokenEntity ? { id: tokenEntity.userId } : null;
+		const tokenEntity = await this.tokenRepository.findOne({
+			where: { refreshTokens: ArrayContains([refreshToken]) },
+			relations: ['user'],
+		});
+		return tokenEntity ? { id: tokenEntity.userId, name: tokenEntity.user.name, role: tokenEntity.user.role } : null;
 	}
 
 	async getToken?(userId: string): Promise<string[] | null> {
@@ -50,10 +53,11 @@ export default class TokenRepository implements TokenStorage {
 	}
 
 	async blackListToken(token: string, relatedData?: Record<string, unknown>): Promise<void> {
-		console.log('blackListToken');
+		console.debug(`Blacklisting token: ${token} : ${JSON.stringify(relatedData)}`);
 	}
 
 	async checkInBlackListedToken(token: string): Promise<Record<string, unknown> | undefined> {
+		console.debug(`Checking token in blacklist: ${token}`);
 		return undefined;
 	}
 }

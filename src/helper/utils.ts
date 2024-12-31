@@ -3,9 +3,11 @@ import {
 	AppendToRequestProperties,
 	AuthedRequest,
 	AuthTokenPayloadVerifier,
+	AuthUser,
 	ExtractApiVersion,
 	RefreshTokenHolderVerifier,
 	RefreshTokenPayloadVerifier,
+	RequestAppends,
 	TokenGenerationHandler,
 	VerifyResponse,
 } from 'src/lib/custom';
@@ -35,11 +37,11 @@ export const appendTokenPayloadToRequest = (
 		typeof decodedTokenPayload !== 'string'
 	) {
 		try {
-			const castedPayload = decodedTokenPayload;
+			const castedPayload: RequestAppends = decodedTokenPayload as RequestAppends;
 
 			appendToRequest.forEach((item: AppendToRequestProperties) => {
 				if (Object.hasOwn(castedPayload, item)) {
-					req[item] = castedPayload[item];
+					req[item] = castedPayload[item] as unknown as (AuthUser & (string | (string & string[]))) | undefined;
 				}
 			});
 		} catch (error) {
@@ -69,7 +71,11 @@ export const authTokenPayloadVerifier: AuthTokenPayloadVerifier = async (
 export const refreshTokenPayloadVerifier: RefreshTokenPayloadVerifier = async (
 	tokenPayload: VerifyResponse,
 ): Promise<void> => {
-	const userId = tokenPayload.user?.id;
+	const user: Record<string, unknown> = (tokenPayload as unknown as Record<string, unknown>)?.user as Record<
+		string,
+		unknown
+	>;
+	const userId = user?.id;
 
 	if (!userId) {
 		throw new Error('Refresh token process failed. User ID not found in the refresh payload.');
@@ -80,7 +86,11 @@ export const refreshTokenHolderVerifier: RefreshTokenHolderVerifier = async (
 	tokenHolder: Record<string, unknown>,
 	tokenPayload: VerifyResponse,
 ): Promise<boolean> => {
-	const userId = tokenPayload.user?.id;
+	const user: Record<string, unknown> = (tokenPayload as unknown as Record<string, unknown>)?.user as Record<
+		string,
+		unknown
+	>;
+	const userId = user?.id;
 
 	return tokenHolder.id === userId;
 };

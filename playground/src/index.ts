@@ -44,7 +44,7 @@ app.get('/', (req, res) => {
 	res.send('Welcome to the Playground!');
 });
 app.use('/auth', authRouters);
-app.use('/user', userRouters);
+app.use('/users', userRouters);
 /* Routes END */
 
 /* Server start */

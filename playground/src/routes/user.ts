@@ -4,7 +4,7 @@ import { roleBasedAuthenticationMiddleware, validateJwtHeaderMiddleware } from '
 
 const router = Router();
 
-router.route('/').get(validateJwtHeaderMiddleware, roleBasedAuthenticationMiddleware('user:list'), listUsers);
+router.route('/').get(validateJwtHeaderMiddleware, roleBasedAuthenticationMiddleware('users:list'), listUsers);
 
 router.route('/:id').get(validateJwtHeaderMiddleware, getUserById);
 
