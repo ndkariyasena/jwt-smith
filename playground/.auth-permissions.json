@@ -1,4 +1,6 @@
 {
+	"versioned": true,
+	"activeVersions": ["v1"],
 	"common": {
 		"roles": [
 			{
@@ -42,7 +44,7 @@
 			]
 		},
 		"users": {
-			"basePath": "/users",
+			"basePath": "/v1/users",
 			"permissions": [
 				{
 					"roles": ["Admin"],

@@ -4,7 +4,7 @@ import { middlewareConfigs, tokenStorage } from 'src/lib/core';
 import { AuthedRequest } from 'src/lib/custom';
 import { log } from 'src/lib/logger';
 import { cookieSettings } from 'src/lib/core';
-import { TokenHandler } from 'src/lib/refresh-token-handler';
+import { TokenHandler } from 'src/module/refresh-token-handler';
 import { appendTokenPayloadToRequest } from 'src/helper/utils';
 
 const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {

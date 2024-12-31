@@ -1,4 +1,14 @@
-import { AppendToRequest, AppendToRequestProperties, AuthedRequest, VerifyResponse } from 'src/lib/custom';
+import {
+	AppendToRequest,
+	AppendToRequestProperties,
+	AuthedRequest,
+	AuthTokenPayloadVerifier,
+	ExtractApiVersion,
+	RefreshTokenHolderVerifier,
+	RefreshTokenPayloadVerifier,
+	TokenGenerationHandler,
+	VerifyResponse,
+} from 'src/lib/custom';
 import { log } from 'src/lib/logger';
 
 export const extractAuthHeaderValue = (header: string): string => {
@@ -40,7 +50,7 @@ export const appendTokenPayloadToRequest = (
 	}
 };
 
-export const defaultTokenGenerationHandler = async (refreshTokenPayload: VerifyResponse) => {
+export const defaultTokenGenerationHandler: TokenGenerationHandler = async (refreshTokenPayload: VerifyResponse) => {
 	console.debug({ refreshTokenPayload });
 	return {
 		token: 'new-token',
@@ -48,13 +58,17 @@ export const defaultTokenGenerationHandler = async (refreshTokenPayload: VerifyR
 	};
 };
 
-export const authTokenPayloadVerifier = async (tokenPayload: VerifyResponse): Promise<void> => {
+export const authTokenPayloadVerifier: AuthTokenPayloadVerifier = async (
+	tokenPayload: VerifyResponse,
+): Promise<void> => {
 	if (!tokenPayload) {
 		throw new Error('Empty payload in the auth token.');
 	}
 };
 
-export const refreshTokenPayloadVerifier = async (tokenPayload: VerifyResponse): Promise<void> => {
+export const refreshTokenPayloadVerifier: RefreshTokenPayloadVerifier = async (
+	tokenPayload: VerifyResponse,
+): Promise<void> => {
 	const userId = tokenPayload.user?.id;
 
 	if (!userId) {
@@ -62,11 +76,16 @@ export const refreshTokenPayloadVerifier = async (tokenPayload: VerifyResponse):
 	}
 };
 
-export const refreshTokenHolderVerifier = async (
+export const refreshTokenHolderVerifier: RefreshTokenHolderVerifier = async (
 	tokenHolder: Record<string, unknown>,
 	tokenPayload: VerifyResponse,
 ): Promise<boolean> => {
 	const userId = tokenPayload.user?.id;
 
 	return tokenHolder.id === userId;
+};
+
+export const extractApiVersion: ExtractApiVersion = async (req: AuthedRequest): Promise<string | undefined> => {
+	const version = req.headers['api-version'] as string;
+	return version ?? req.baseUrl.split('/')[1];
 };
