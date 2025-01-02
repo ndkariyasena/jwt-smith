@@ -14,6 +14,7 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
 			req.cookies && cookieSettings.accessTokenCookieName
 				? req.cookies[cookieSettings.accessTokenCookieName]
 				: undefined;
+
 		const refreshToken =
 			req.cookies && cookieSettings.refreshTokenCookieName
 				? req.cookies[cookieSettings.refreshTokenCookieName]
