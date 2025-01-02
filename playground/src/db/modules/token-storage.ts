@@ -38,7 +38,7 @@ export default class TokenRepository implements TokenStorage {
 		return tokenEntity ? { id: tokenEntity.userId, name: tokenEntity.user.name, role: tokenEntity.user.role } : null;
 	}
 
-	async getToken?(userId: string): Promise<string[] | null> {
+	async getToken(userId: string): Promise<string[] | null> {
 		const tokenEntity = await this.tokenRepository.findOne({ where: { userId } });
 		return tokenEntity?.tokens || null;
 	}
@@ -52,11 +52,11 @@ export default class TokenRepository implements TokenStorage {
 		await this.tokenRepository.delete({ userId });
 	}
 
-	async blackListToken(token: string, relatedData?: Record<string, unknown>): Promise<void> {
+	async blackListRefreshToken(token: string, relatedData?: Record<string, unknown>): Promise<void> {
 		console.debug(`Blacklisting token: ${token} : ${JSON.stringify(relatedData)}`);
 	}
 
-	async checkInBlackListedToken(token: string): Promise<Record<string, unknown> | undefined> {
+	async checkBlackListedRefreshToken(token: string): Promise<Record<string, unknown> | undefined> {
 		console.debug(`Checking token in blacklist: ${token}`);
 		return undefined;
 	}

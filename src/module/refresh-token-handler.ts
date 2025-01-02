@@ -45,7 +45,7 @@ export class TokenHandler {
 			})
 			.catch(async (error) => {
 				if (error instanceof TokenExpiredError && refreshToken) {
-					const response = await this.rotateRefreshToken(refreshToken);
+					const response = await this.rotateRefreshToken(refreshToken, authToken);
 
 					token = response.token;
 					nextRefreshToken = response.refreshToken;
@@ -75,9 +75,9 @@ export class TokenHandler {
 		return tokenPayload;
 	}
 
-	async rotateRefreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
+	async rotateRefreshToken(refreshToken: string, token?: string): Promise<{ token: string; refreshToken: string }> {
 		try {
-			const isBlackListed = await this.refreshTokenStorage.checkInBlackListedToken(refreshToken);
+			const isBlackListed = await this.refreshTokenStorage.checkBlackListedRefreshToken(refreshToken);
 
 			if (isBlackListed) {
 				log('error', 'Blacklisted refresh token received!', { refreshToken });
@@ -105,7 +105,7 @@ export class TokenHandler {
 			const isHolderVerified = await this.refreshTokenHolderVerifier(tokenHolder, decodedTokenPayload);
 
 			if (!isHolderVerified) {
-				await this.refreshTokenStorage.blackListToken(refreshToken);
+				await this.refreshTokenStorage.blackListRefreshToken(refreshToken);
 
 				throw new Error('Refresh token holder verification failed.');
 			}
@@ -118,22 +118,22 @@ export class TokenHandler {
 					? decodedTokenPayload.user?.id
 					: undefined);
 
-			await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken);
+			await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken, response.token);
 
 			return response;
 		} catch (error) {
-			await this.cleanupInvalidRefreshToken(refreshToken);
+			await this.cleanupInvalidRefreshToken(refreshToken, token);
 
 			throw error;
 		}
 	}
 
-	async cleanupInvalidRefreshToken(refreshToken: string): Promise<void> {
+	async cleanupInvalidRefreshToken(refreshToken: string, token?: string): Promise<void> {
 		const tokenHolder = await this.refreshTokenStorage.getRefreshTokenHolder(refreshToken);
 
 		if (tokenHolder && Object.hasOwn(tokenHolder, 'id')) {
 			const userId: string = tokenHolder.id as string;
-			await this.refreshTokenStorage.deleteToken(userId, undefined, refreshToken);
+			await this.refreshTokenStorage.deleteToken(userId, token, refreshToken);
 		}
 	}
 }
