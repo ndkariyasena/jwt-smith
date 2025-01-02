@@ -15,10 +15,10 @@ import { setDefaultSignOptions } from './signing-token';
 import { setDefaultVerifyOptions } from './verify-token';
 import {
 	defaultTokenGenerationHandler,
-	extractApiVersion,
+	defaultExtractApiVersion,
 	extractAuthHeaderValue,
-	refreshTokenHolderVerifier,
-	refreshTokenPayloadVerifier,
+	defaultRefreshTokenPayloadVerifier,
+	defaultRefreshTokenHolderVerifier,
 } from 'src/helper/utils';
 
 export let tokenStorage: TokenStorage;
@@ -36,9 +36,9 @@ export let middlewareConfigs: MiddlewareConfigsOptions = {
 	cookies: { accessTokenCookieName: 'accessToken', accessCookieOptions: {}, refreshTokenCookieName: undefined },
 	authTokenExtractor: extractAuthHeaderValue,
 	tokenGenerationHandler: defaultTokenGenerationHandler,
-	refreshTokenPayloadVerifier: refreshTokenPayloadVerifier,
-	refreshTokenHolderVerifier: refreshTokenHolderVerifier,
-	extractApiVersion: extractApiVersion,
+	refreshTokenPayloadVerifier: defaultRefreshTokenPayloadVerifier,
+	refreshTokenHolderVerifier: defaultRefreshTokenHolderVerifier,
+	extractApiVersion: defaultExtractApiVersion,
 };
 
 interface ConfigOptions {

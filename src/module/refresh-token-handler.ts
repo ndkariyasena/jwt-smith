@@ -12,7 +12,11 @@ import { RefreshTokenHandlerOptions, ValidateResponse } from './internal';
 import { publicKey, refreshTokenKey } from 'src/lib/core';
 import { log } from 'src/lib/logger';
 import { verify } from 'src/lib/verify-token';
-import { authTokenPayloadVerifier, refreshTokenHolderVerifier, refreshTokenPayloadVerifier } from 'src/helper/utils';
+import {
+	defaultAuthTokenPayloadVerifier,
+	defaultRefreshTokenPayloadVerifier,
+	defaultRefreshTokenHolderVerifier,
+} from 'src/helper/utils';
 
 /* TODO: Next step is to implement the session handling. */
 export class TokenHandler {
@@ -25,9 +29,9 @@ export class TokenHandler {
 	constructor(options: RefreshTokenHandlerOptions) {
 		this.refreshTokenStorage = options.refreshTokenStorage || new DefaultTokenStorage();
 		this.tokenGenerationHandler = options.tokenGenerationHandler;
-		this.authTokenPayloadVerifier = options.authTokenPayloadVerifier || authTokenPayloadVerifier;
-		this.refreshTokenPayloadVerifier = options.refreshTokenPayloadVerifier || refreshTokenPayloadVerifier;
-		this.refreshTokenHolderVerifier = options.refreshTokenHolderVerifier || refreshTokenHolderVerifier;
+		this.authTokenPayloadVerifier = options.authTokenPayloadVerifier || defaultAuthTokenPayloadVerifier;
+		this.refreshTokenPayloadVerifier = options.refreshTokenPayloadVerifier || defaultRefreshTokenPayloadVerifier;
+		this.refreshTokenHolderVerifier = options.refreshTokenHolderVerifier || defaultRefreshTokenHolderVerifier;
 
 		if (!options.refreshTokenStorage) {
 			log('warn', '[TokenHandler]: Using default in-memory token storage. This is not recommended for production.');
