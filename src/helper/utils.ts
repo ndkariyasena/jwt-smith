@@ -36,6 +36,8 @@ export const appendTokenPayloadToRequest = (
 		decodedTokenPayload &&
 		typeof decodedTokenPayload !== 'string'
 	) {
+		log('debug', `Properties to append to the request: ${appendToRequest}`);
+
 		try {
 			const castedPayload: RequestAppends = decodedTokenPayload as RequestAppends;
 
@@ -48,19 +50,22 @@ export const appendTokenPayloadToRequest = (
 			log('error', 'Token payload appending to the request failed!', error);
 		}
 	} else if (typeof appendToRequest === 'boolean' && typeof decodedTokenPayload === 'string') {
+		log('debug', `Token payload appending to the request: ${decodedTokenPayload}`);
+
 		req.tokenPayload = decodedTokenPayload;
 	}
 };
 
 export const defaultTokenGenerationHandler: TokenGenerationHandler = async (refreshTokenPayload: VerifyResponse) => {
 	console.debug({ refreshTokenPayload });
+
 	return {
 		token: 'new-token',
 		refreshToken: 'new-refresh-token',
 	};
 };
 
-export const authTokenPayloadVerifier: AuthTokenPayloadVerifier = async (
+export const defaultAuthTokenPayloadVerifier: AuthTokenPayloadVerifier = async (
 	tokenPayload: VerifyResponse,
 ): Promise<void> => {
 	if (!tokenPayload) {
@@ -68,7 +73,7 @@ export const authTokenPayloadVerifier: AuthTokenPayloadVerifier = async (
 	}
 };
 
-export const refreshTokenPayloadVerifier: RefreshTokenPayloadVerifier = async (
+export const defaultRefreshTokenPayloadVerifier: RefreshTokenPayloadVerifier = async (
 	tokenPayload: VerifyResponse,
 ): Promise<void> => {
 	const user: Record<string, unknown> = (tokenPayload as unknown as Record<string, unknown>)?.user as Record<
@@ -82,7 +87,7 @@ export const refreshTokenPayloadVerifier: RefreshTokenPayloadVerifier = async (
 	}
 };
 
-export const refreshTokenHolderVerifier: RefreshTokenHolderVerifier = async (
+export const defaultRefreshTokenHolderVerifier: RefreshTokenHolderVerifier = async (
 	tokenHolder: Record<string, unknown>,
 	tokenPayload: VerifyResponse,
 ): Promise<boolean> => {
@@ -95,7 +100,7 @@ export const refreshTokenHolderVerifier: RefreshTokenHolderVerifier = async (
 	return tokenHolder.id === userId;
 };
 
-export const extractApiVersion: ExtractApiVersion = async (req: AuthedRequest): Promise<string | undefined> => {
+export const defaultExtractApiVersion: ExtractApiVersion = async (req: AuthedRequest): Promise<string | undefined> => {
 	const version = req.headers['api-version'] as string;
 	return version ?? req.baseUrl.split('/')[1];
 };

@@ -12,7 +12,11 @@ import { RefreshTokenHandlerOptions, ValidateResponse } from './internal';
 import { publicKey, refreshTokenKey } from 'src/lib/core';
 import { log } from 'src/lib/logger';
 import { verify } from 'src/lib/verify-token';
-import { authTokenPayloadVerifier, refreshTokenHolderVerifier, refreshTokenPayloadVerifier } from 'src/helper/utils';
+import {
+	defaultAuthTokenPayloadVerifier,
+	defaultRefreshTokenPayloadVerifier,
+	defaultRefreshTokenHolderVerifier,
+} from 'src/helper/utils';
 
 /* TODO: Next step is to implement the session handling. */
 export class TokenHandler {
@@ -25,9 +29,9 @@ export class TokenHandler {
 	constructor(options: RefreshTokenHandlerOptions) {
 		this.refreshTokenStorage = options.refreshTokenStorage || new DefaultTokenStorage();
 		this.tokenGenerationHandler = options.tokenGenerationHandler;
-		this.authTokenPayloadVerifier = options.authTokenPayloadVerifier || authTokenPayloadVerifier;
-		this.refreshTokenPayloadVerifier = options.refreshTokenPayloadVerifier || refreshTokenPayloadVerifier;
-		this.refreshTokenHolderVerifier = options.refreshTokenHolderVerifier || refreshTokenHolderVerifier;
+		this.authTokenPayloadVerifier = options.authTokenPayloadVerifier || defaultAuthTokenPayloadVerifier;
+		this.refreshTokenPayloadVerifier = options.refreshTokenPayloadVerifier || defaultRefreshTokenPayloadVerifier;
+		this.refreshTokenHolderVerifier = options.refreshTokenHolderVerifier || defaultRefreshTokenHolderVerifier;
 
 		if (!options.refreshTokenStorage) {
 			log('warn', '[TokenHandler]: Using default in-memory token storage. This is not recommended for production.');
@@ -45,7 +49,7 @@ export class TokenHandler {
 			})
 			.catch(async (error) => {
 				if (error instanceof TokenExpiredError && refreshToken) {
-					const response = await this.rotateRefreshToken(refreshToken);
+					const response = await this.rotateRefreshToken(refreshToken, authToken);
 
 					token = response.token;
 					nextRefreshToken = response.refreshToken;
@@ -75,9 +79,9 @@ export class TokenHandler {
 		return tokenPayload;
 	}
 
-	async rotateRefreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
+	async rotateRefreshToken(refreshToken: string, token?: string): Promise<{ token: string; refreshToken: string }> {
 		try {
-			const isBlackListed = await this.refreshTokenStorage.checkInBlackListedToken(refreshToken);
+			const isBlackListed = await this.refreshTokenStorage.checkBlackListedRefreshToken(refreshToken);
 
 			if (isBlackListed) {
 				log('error', 'Blacklisted refresh token received!', { refreshToken });
@@ -105,7 +109,7 @@ export class TokenHandler {
 			const isHolderVerified = await this.refreshTokenHolderVerifier(tokenHolder, decodedTokenPayload);
 
 			if (!isHolderVerified) {
-				await this.refreshTokenStorage.blackListToken(refreshToken);
+				await this.refreshTokenStorage.blackListRefreshToken(refreshToken);
 
 				throw new Error('Refresh token holder verification failed.');
 			}
@@ -118,22 +122,22 @@ export class TokenHandler {
 					? decodedTokenPayload.user?.id
 					: undefined);
 
-			await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken);
+			await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken, response.token);
 
 			return response;
 		} catch (error) {
-			await this.cleanupInvalidRefreshToken(refreshToken);
+			await this.cleanupInvalidRefreshToken(refreshToken, token);
 
 			throw error;
 		}
 	}
 
-	async cleanupInvalidRefreshToken(refreshToken: string): Promise<void> {
+	async cleanupInvalidRefreshToken(refreshToken: string, token?: string): Promise<void> {
 		const tokenHolder = await this.refreshTokenStorage.getRefreshTokenHolder(refreshToken);
 
 		if (tokenHolder && Object.hasOwn(tokenHolder, 'id')) {
 			const userId: string = tokenHolder.id as string;
-			await this.refreshTokenStorage.deleteToken(userId, undefined, refreshToken);
+			await this.refreshTokenStorage.deleteToken(userId, token, refreshToken);
 		}
 	}
 }

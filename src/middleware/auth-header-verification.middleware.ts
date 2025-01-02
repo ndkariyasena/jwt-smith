@@ -35,6 +35,8 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 				tokenGenerationHandler: tokenGenerationHandler,
 			});
 
+			log('debug', `Auth token: ${tokenValue} | Refresh token: ${refreshToken}`);
+
 			const { decodedToken, nextRefreshToken, token } = await refreshTokenHandler.validateOrRefreshAuthToken(
 				tokenValue,
 				refreshToken,
@@ -49,6 +51,7 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 			res.setHeader(authHeaderName ?? 'authorization', token);
 
 			if (cookieSettings.refreshTokenCookieName && nextRefreshToken) {
+				log('debug', 'New refresh token set in the cookie.');
 				res.cookie(cookieSettings.refreshTokenCookieName, nextRefreshToken, cookieSettings.refreshCookieOptions || {});
 			}
 

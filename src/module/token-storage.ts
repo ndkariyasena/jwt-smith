@@ -53,11 +53,11 @@ export default class DefaultTokenStorage implements TokenStorage {
 		return this.tokens.get(userId)?.refreshToken || null;
 	}
 
-	async blackListToken(token: string, relatedData?: Record<string, unknown>): Promise<void> {
+	async blackListRefreshToken(token: string, relatedData?: Record<string, unknown>): Promise<void> {
 		this.defectedTokens.set(token, relatedData || {});
 	}
 
-	async checkInBlackListedToken(token: string): Promise<Record<string, unknown> | undefined> {
+	async checkBlackListedRefreshToken(token: string): Promise<Record<string, unknown> | undefined> {
 		return this.defectedTokens.get(token);
 	}
 }

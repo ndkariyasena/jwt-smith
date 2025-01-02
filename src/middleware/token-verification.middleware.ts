@@ -14,6 +14,7 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
 			req.cookies && cookieSettings.accessTokenCookieName
 				? req.cookies[cookieSettings.accessTokenCookieName]
 				: undefined;
+
 		const refreshToken =
 			req.cookies && cookieSettings.refreshTokenCookieName
 				? req.cookies[cookieSettings.refreshTokenCookieName]
@@ -22,6 +23,8 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
 		if (!accessToken && !refreshToken) {
 			throw new Error('Auth cookie not found!');
 		}
+
+		log('debug', `Access token: ${accessToken} | Refresh token: ${refreshToken}`);
 
 		const refreshTokenHandler = new TokenHandler({
 			refreshTokenStorage: tokenStorage,
@@ -40,10 +43,14 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
 		appendTokenPayloadToRequest(req, appendToRequest, decodedToken);
 
 		if (cookieSettings.accessTokenCookieName) {
+			log('debug', 'New access token set in the cookie.');
+
 			res.cookie(cookieSettings.accessTokenCookieName, token, cookieSettings.accessCookieOptions || {});
 		}
 
 		if (cookieSettings.refreshTokenCookieName && nextRefreshToken) {
+			log('debug', 'New refresh token set in the cookie.');
+
 			res.cookie(cookieSettings.refreshTokenCookieName, nextRefreshToken, cookieSettings.refreshCookieOptions || {});
 		}
 

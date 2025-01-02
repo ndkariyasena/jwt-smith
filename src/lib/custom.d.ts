@@ -97,12 +97,12 @@ export interface VerifyTokenOptions {
 
 export interface TokenStorage {
 	getToken?: (userId: string) => Promise<string | string[] | null>;
+	getRefreshToken: (userId: string) => Promise<string | string[] | null>;
 	getRefreshTokenHolder: (refreshToken: string) => Promise<Record<string, unknown> | null>;
 	saveOrUpdateToken: (userId: string, refreshToken: string, token?: string) => Promise<void>;
 	deleteToken: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
-	getRefreshToken?: (userId: string) => Promise<string | string[] | null>;
-	blackListToken: (token: string, relatedData?: Record<string, unknown>) => Promise<void>;
-	checkInBlackListedToken: (token: string) => Promise<Record<string, unknown> | undefined>;
+	blackListRefreshToken: (token: string, relatedData?: Record<string, unknown>) => Promise<void>;
+	checkBlackListedRefreshToken: (token: string) => Promise<Record<string, unknown> | undefined>;
 }
 
 export interface SessionStorage {

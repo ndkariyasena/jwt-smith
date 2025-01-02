@@ -78,6 +78,10 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 			}
 		}
 
+		log(
+			'debug',
+			`User role: ${userRole} | Required action: ${requiredAction} | Endpoint: ${endpointPath} | Method: ${method}`,
+		);
 		log('debug', `API version extracted from the request: ${requestVersion}`);
 
 		if (!userRole) {
@@ -109,6 +113,8 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 			}
 
 			if (versionValidationError) {
+				log('error', versionValidationError);
+
 				res.status(400).json({ error: versionValidationError });
 			} else {
 				/* Match standalone endpoints. */
