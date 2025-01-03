@@ -1,4 +1,4 @@
-import { TokenStorage } from 'src/lib/custom';
+import { TokenStorage } from '../lib/custom';
 
 interface tokenEntity {
 	refreshToken?: string[];

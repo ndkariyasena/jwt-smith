@@ -10,8 +10,8 @@ import {
 	RequestAppends,
 	TokenGenerationHandler,
 	VerifyResponse,
-} from 'src/lib/custom';
-import { log } from 'src/lib/logger';
+} from '../lib/custom';
+import { log } from '../lib/logger';
 
 export const extractAuthHeaderValue = (header: string): string => {
 	let tokenValue;

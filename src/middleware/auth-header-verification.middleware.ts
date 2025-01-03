@@ -1,11 +1,11 @@
 import { NextFunction, Response } from 'express';
 
-import { middlewareConfigs, tokenStorage } from 'src/lib/core';
-import { AuthedRequest } from 'src/lib/custom';
-import { log } from 'src/lib/logger';
-import { cookieSettings } from 'src/lib/core';
-import { TokenHandler } from 'src/module/refresh-token-handler';
-import { appendTokenPayloadToRequest } from 'src/helper/utils';
+import { middlewareConfigs, tokenStorage } from '../lib/core';
+import { AuthedRequest } from '../lib/custom';
+import { log } from '../lib/logger';
+import { cookieSettings } from '../lib/core';
+import { TokenHandler } from '../module/refresh-token-handler';
+import { appendTokenPayloadToRequest } from '../helper/utils';
 
 const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {
 	try {

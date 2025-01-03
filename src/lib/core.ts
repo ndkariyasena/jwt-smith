@@ -19,7 +19,7 @@ import {
 	extractAuthHeaderValue,
 	defaultRefreshTokenPayloadVerifier,
 	defaultRefreshTokenHolderVerifier,
-} from 'src/helper/utils';
+} from '../helper/utils';
 
 export let tokenStorage: TokenStorage;
 export let sessionStorage: SessionStorage;

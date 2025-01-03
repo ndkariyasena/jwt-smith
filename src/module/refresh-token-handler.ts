@@ -1,4 +1,4 @@
-import DefaultTokenStorage from 'src/module/token-storage';
+import DefaultTokenStorage from './token-storage';
 import {
 	TokenStorage,
 	VerifyResponse,
@@ -7,16 +7,16 @@ import {
 	RefreshTokenPayloadVerifier,
 	RefreshTokenHolderVerifier,
 	AuthTokenPayloadVerifier,
-} from 'src/lib/custom.d';
+} from '../lib/custom.d';
 import { RefreshTokenHandlerOptions, ValidateResponse } from './internal';
-import { publicKey, refreshTokenKey } from 'src/lib/core';
-import { log } from 'src/lib/logger';
-import { verify } from 'src/lib/verify-token';
+import { publicKey, refreshTokenKey } from '../lib/core';
+import { log } from '../lib/logger';
+import { verify } from '../lib/verify-token';
 import {
 	defaultAuthTokenPayloadVerifier,
 	defaultRefreshTokenPayloadVerifier,
 	defaultRefreshTokenHolderVerifier,
-} from 'src/helper/utils';
+} from '../helper/utils';
 
 /* TODO: Next step is to implement the session handling. */
 export class TokenHandler {
@@ -76,6 +76,7 @@ export class TokenHandler {
 		await this.authTokenPayloadVerifier(tokenPayload);
 
 		log('info', 'Auth token validation complete!');
+
 		return tokenPayload;
 	}
 
@@ -132,7 +133,7 @@ export class TokenHandler {
 		}
 	}
 
-	async cleanupInvalidRefreshToken(refreshToken: string, token?: string): Promise<void> {
+	private async cleanupInvalidRefreshToken(refreshToken: string, token?: string): Promise<void> {
 		const tokenHolder = await this.refreshTokenStorage.getRefreshTokenHolder(refreshToken);
 
 		if (tokenHolder && Object.hasOwn(tokenHolder, 'id')) {

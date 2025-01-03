@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { middlewareConfigs, tokenStorage } from 'src/lib/core';
-import { log } from 'src/lib/logger';
-import { cookieSettings } from 'src/lib/core';
-import { appendTokenPayloadToRequest } from 'src/helper/utils';
-import { TokenHandler } from 'src/module/refresh-token-handler';
+import { middlewareConfigs, tokenStorage } from '../lib/core';
+import { log } from '../lib/logger';
+import { cookieSettings } from '../lib/core';
+import { appendTokenPayloadToRequest } from '../helper/utils';
+import { TokenHandler } from '../module/refresh-token-handler';
 
 const authenticateJwtMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
