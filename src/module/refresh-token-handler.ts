@@ -34,7 +34,8 @@ export class TokenHandler {
 		this.refreshTokenHolderVerifier = options.refreshTokenHolderVerifier || defaultRefreshTokenHolderVerifier;
 
 		if (!options.refreshTokenStorage) {
-			log('warn', '[TokenHandler]: Using default in-memory token storage. This is not recommended for production.');
+			const logType = process.env.NODE_ENV === 'production' ? 'error' : 'warn';
+			log(logType, '[TokenHandler]: Using default in-memory token storage. This is not recommended for production.');
 		}
 	}
 
