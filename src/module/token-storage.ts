@@ -31,6 +31,7 @@ export default class DefaultTokenStorage implements TokenStorage {
 		let holder = null;
 
 		this.tokens.forEach((data, userId) => {
+			console.log({ data, userId });
 			if (data.refreshToken?.includes(refreshToken)) {
 				holder = this.tokens.get(userId);
 
