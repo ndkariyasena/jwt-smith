@@ -1,8 +1,8 @@
 import { Request, CookieOptions } from 'express';
 import { JsonWebKeyInput, KeyObject, PrivateKeyInput, PublicKeyInput } from 'node:crypto';
-import { Jwt, JwtPayload, JwtHeader } from 'jsonwebtoken';
+import { Jwt, JwtPayload, JwtHeader, JsonWebTokenError, TokenExpiredError, NotBeforeError } from 'jsonwebtoken';
 
-export { JsonWebTokenError, TokenExpiredError, NotBeforeError } from 'jsonwebtoken';
+export { TokenExpiredError };
 
 export interface Logger {
 	info: (message: string, ...args: unknown[]) => void;
@@ -10,6 +10,10 @@ export interface Logger {
 	error: (message: string, ...args: unknown[]) => void;
 	debug: (message: string, ...args: unknown[]) => void;
 }
+
+export type TokenExpiredError = typeof TokenExpiredError;
+export type JsonWebTokenError = typeof JsonWebTokenError;
+export type NotBeforeError = typeof NotBeforeError;
 
 export type Secret = string | Buffer | KeyObject | { key: string | Buffer; passphrase: string };
 

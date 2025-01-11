@@ -3,8 +3,8 @@ import { verify, setDefaultVerifyOptions } from '../src/lib/verify-token';
 
 import { JsonWebTokenError } from 'jsonwebtoken';
 
-describe('Verify', () => {
-	describe('Token "verify" method related tests.', () => {
+describe('> Verify', () => {
+	describe('>> Token "verify" method related tests.', () => {
 		it('01. Should throw an error for invalid secret value.', async () => {
 			await verify({
 				token: 'qqq.2.44',
@@ -50,7 +50,7 @@ describe('Verify', () => {
 		});
 	});
 
-	describe('Token "setDefaultVerifyOptions" method related tests.', () => {
+	describe('>> Token "setDefaultVerifyOptions" method related tests.', () => {
 		it('01. Verify method should pass with the correct data.', async () => {
 			const iss = 'https://example.com';
 			const aud = 'your-app';

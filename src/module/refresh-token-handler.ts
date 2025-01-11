@@ -1,8 +1,8 @@
 import DefaultTokenStorage from './token-storage';
+import { TokenExpiredError } from 'jsonwebtoken';
 import {
 	TokenStorage,
 	VerifyResponse,
-	TokenExpiredError,
 	TokenGenerationHandler,
 	RefreshTokenPayloadVerifier,
 	RefreshTokenHolderVerifier,

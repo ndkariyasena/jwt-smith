@@ -1,8 +1,8 @@
 import { sign, setDefaultSignOptions } from '../src/lib/signing-token';
 import { verify } from '../src/lib/verify-token';
 
-describe('Signin', () => {
-	describe('Token "signing" method related tests.', () => {
+describe('> Signin', () => {
+	describe('>> Token "signing" method related tests.', () => {
 		it('01. Should throw an error for invalid secret value.', async () => {
 			await sign({
 				payload: {},
@@ -25,7 +25,7 @@ describe('Signin', () => {
 		});
 	});
 
-	describe('Token "setDefaultSignOptions" method related tests.', () => {
+	describe('>> Token "setDefaultSignOptions" method related tests.', () => {
 		it('01. Pre-set values should be included in the decoded token.', async () => {
 			const iss = 'https://example.com';
 			const aud = 'your-app';
