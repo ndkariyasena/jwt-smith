@@ -13,13 +13,11 @@ import {
 } from '../lib/custom';
 import { log } from '../lib/logger';
 
-export const extractAuthHeaderValue = (header: string): string => {
+export const extractAuthHeaderValue = (header: string): string | undefined => {
 	let tokenValue;
 
 	if (header && header.split(' ')[1]) {
 		tokenValue = header.split(' ')[1] as string;
-	} else {
-		tokenValue = header;
 	}
 
 	return tokenValue;
@@ -57,7 +55,12 @@ export const appendTokenPayloadToRequest = (
 };
 
 export const defaultTokenGenerationHandler: TokenGenerationHandler = async (refreshTokenPayload: VerifyResponse) => {
-	console.debug({ refreshTokenPayload });
+	if (process.env.NODE_ENV === 'production') {
+		throw new Error('Token generation handler not implemented.');
+	} else {
+		log('warn', 'Token generation handler not implemented. Using default handler.');
+		console.debug({ refreshTokenPayload });
+	}
 
 	return {
 		token: 'new-token',

@@ -15,14 +15,14 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 		if (Array.isArray(authHeader)) authHeader = authHeader.join('__');
 
 		if (!authHeader || !authHeader.startsWith('Bearer ')) {
-			throw new Error('Valid auth header not found!');
+			throw new Error('Valid auth header not found');
 		}
 
 		if (authTokenExtractor) {
 			const tokenValue = authTokenExtractor(authHeader);
 
 			if (!tokenValue) {
-				throw new Error('Auth token not found.');
+				throw new Error('Auth token not found');
 			}
 
 			const refreshToken =
@@ -55,13 +55,15 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 				res.cookie(cookieSettings.refreshTokenCookieName, nextRefreshToken, cookieSettings.refreshCookieOptions || {});
 			}
 
-			next();
+			return next();
 		} else {
-			throw new Error('Token value extractor method not found.');
+			throw new Error('Token value extractor method not found');
 		}
 	} catch (error) {
 		log('error', 'Error occurred while authenticating the JST token.', error);
-		res.sendStatus(401);
+
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+		res.status(401).json({ message: 'Unauthorized', error: errorMessage });
 	}
 };
 

@@ -13,6 +13,7 @@ jest.mock('../src/lib/logger', () => ({
 }));
 
 const Secret = 'SupperPass123';
+const userId = '1234';
 
 const createAuthToken = async (options = {}, payload = {}): Promise<string> => {
 	const token = (await sign({
@@ -35,12 +36,20 @@ describe('> Refresh Token Handler', () => {
 		jest.restoreAllMocks();
 	});
 
+	afterAll(() => {
+		jest.resetAllMocks();
+		jest.clearAllMocks();
+
+		configure({});
+	});
+
 	describe('>> Refresh token handler instance related tests.', () => {
 		it('01. Log method should be called with a warning message when the default token storage is used.', async () => {
 			new TokenHandler({
 				tokenGenerationHandler: jest.fn(),
 			});
 
+			/* Assert */
 			expect(log).toHaveBeenCalled();
 			expect(log).toHaveBeenCalledTimes(1);
 			expect(log).toHaveBeenCalledWith(
@@ -54,6 +63,7 @@ describe('> Refresh Token Handler', () => {
 				tokenGenerationHandler: jest.fn(),
 			});
 
+			/* Assert */
 			expect(DefaultTokenStorage).toHaveBeenCalled();
 		});
 	});
@@ -76,6 +86,7 @@ describe('> Refresh Token Handler', () => {
 
 			const decoded = (await tokenHandler.validateAuthToken(token)) as unknown as Record<string, unknown>;
 
+			/* Assert */
 			expect(decoded).not.toBeNull();
 			expect(decoded?.iss).toBe(iss);
 			expect(decoded?.aud).toBe(aud);
@@ -89,10 +100,11 @@ describe('> Refresh Token Handler', () => {
 
 			const token = 'invalid-token';
 
-			await tokenHandler.validateAuthToken(token).catch((error) => {
-				expect(error).not.toBeNull();
-				expect(error instanceof JsonWebTokenError).toBe(true);
-			});
+			const output = await tokenHandler.validateAuthToken(token).catch((error) => error);
+
+			/* Assert */
+			expect(output).not.toBeNull();
+			expect(output instanceof JsonWebTokenError).toBe(true);
 		});
 
 		it('03. Should use the default auth token payload verifier when the custom verifier is not provided.', async () => {
@@ -106,6 +118,7 @@ describe('> Refresh Token Handler', () => {
 
 			await tokenHandler.validateAuthToken(token);
 
+			/* Assert */
 			expect(utils.defaultAuthTokenPayloadVerifier).toHaveBeenCalled();
 		});
 
@@ -121,6 +134,7 @@ describe('> Refresh Token Handler', () => {
 
 			await tokenHandler.validateAuthToken(token);
 
+			/* Assert */
 			expect(customAuthTokenPayloadVerifier).toHaveBeenCalled();
 		});
 	});
@@ -134,13 +148,13 @@ describe('> Refresh Token Handler', () => {
 				token: 'new-token',
 			};
 
-			const refreshToken = await createAuthToken(undefined, { user: { id: userId, name: 'tester' } });
-
 			jest.spyOn(utils, 'defaultRefreshTokenPayloadVerifier');
 			jest.spyOn(utils, 'defaultRefreshTokenHolderVerifier').mockImplementation(async () => true);
 			jest
 				.spyOn(DefaultTokenStorage.prototype, 'getRefreshTokenHolder')
 				.mockImplementation(async () => ({ id: userId }));
+
+			const refreshToken = await createAuthToken(undefined, { user: { id: userId, name: 'tester' } });
 
 			const tokenHandler = new TokenHandler({
 				tokenGenerationHandler: jest.fn().mockResolvedValueOnce(finalResult),
@@ -148,6 +162,7 @@ describe('> Refresh Token Handler', () => {
 
 			await tokenHandler.rotateRefreshToken(refreshToken);
 
+			/* Assert */
 			expect(utils.defaultRefreshTokenPayloadVerifier).toHaveBeenCalled();
 			expect(utils.defaultRefreshTokenHolderVerifier).toHaveBeenCalled();
 		});
@@ -155,20 +170,19 @@ describe('> Refresh Token Handler', () => {
 		it('02. Should check the refresh token in the blacklist.', async () => {
 			jest.spyOn(DefaultTokenStorage.prototype, 'checkBlackListedRefreshToken');
 
-			const token = await createAuthToken();
-
 			const tokenHandler = new TokenHandler({
 				tokenGenerationHandler: jest.fn(),
 			});
 
+			const token = await createAuthToken();
+
 			await tokenHandler.rotateRefreshToken(token).catch((error) => error);
 
+			/* Assert */
 			expect(DefaultTokenStorage.prototype.checkBlackListedRefreshToken).toHaveBeenCalled();
 		});
 
 		it('03. Should throw an error when the refresh token is blacklisted.', async () => {
-			const userId = '1234';
-
 			const finalResult = {
 				refreshToken: 'new-refresh-token',
 				token: 'new-token',
@@ -191,6 +205,7 @@ describe('> Refresh Token Handler', () => {
 			const error = await tokenHandler.rotateRefreshToken(blacklistedToken).catch((error) => error);
 			const output = await tokenHandler.rotateRefreshToken(refreshToken);
 
+			/* Assert */
 			expect(log).toHaveBeenCalled();
 			expect(error instanceof Error).toBe(true);
 			expect(output instanceof Error).toBe(false);
@@ -198,8 +213,6 @@ describe('> Refresh Token Handler', () => {
 		});
 
 		it('04. Should throw an error when the refresh token payload verification failed.', async () => {
-			const userId = '1234';
-
 			const finalResult = {
 				refreshToken: 'new-refresh-token',
 				token: 'new-token',
@@ -227,6 +240,7 @@ describe('> Refresh Token Handler', () => {
 			const error = await tokenHandler.rotateRefreshToken(blacklistedToken).catch((error) => error);
 			const output = await tokenHandler.rotateRefreshToken(refreshToken);
 
+			/* Assert */
 			expect(log).toHaveBeenCalled();
 			expect(error instanceof Error).toBe(true);
 			expect(output instanceof Error).toBe(false);
@@ -234,8 +248,6 @@ describe('> Refresh Token Handler', () => {
 		});
 
 		it('05. Should throw an error when can not find the refresh token holder.', async () => {
-			const userId = '1234';
-
 			jest.spyOn(DefaultTokenStorage.prototype, 'blackListRefreshToken');
 
 			jest
@@ -261,6 +273,7 @@ describe('> Refresh Token Handler', () => {
 			const error = await tokenHandler.rotateRefreshToken(blacklistedToken).catch((error) => error);
 			const output = await tokenHandler.rotateRefreshToken(refreshToken);
 
+			/* Assert */
 			expect(log).toHaveBeenCalled();
 			expect(error instanceof Error).toBe(true);
 			expect(output instanceof Error).toBe(false);
@@ -268,8 +281,6 @@ describe('> Refresh Token Handler', () => {
 		});
 
 		it('06. Should throw an error when the refresh token holder verification failed.', async () => {
-			const userId = '1234';
-
 			jest.spyOn(DefaultTokenStorage.prototype, 'blackListRefreshToken');
 
 			jest
@@ -297,6 +308,7 @@ describe('> Refresh Token Handler', () => {
 			const error = await tokenHandler.rotateRefreshToken(blacklistedToken).catch((error) => error);
 			const output = await tokenHandler.rotateRefreshToken(refreshToken);
 
+			/* Assert */
 			expect(log).toHaveBeenCalled();
 			expect(error instanceof Error).toBe(true);
 			expect(output instanceof Error).toBe(false);
@@ -305,8 +317,6 @@ describe('> Refresh Token Handler', () => {
 		});
 
 		it('07. Should return the new token and refresh token when the refresh token rotation is successful.', async () => {
-			const userId = '1234';
-
 			jest
 				.spyOn(DefaultTokenStorage.prototype, 'checkBlackListedRefreshToken')
 				.mockImplementation(async () => undefined);
@@ -327,6 +337,7 @@ describe('> Refresh Token Handler', () => {
 
 			const output = await tokenHandler.rotateRefreshToken(refreshToken);
 
+			/* Assert */
 			expect(output instanceof Error).toBe(false);
 			expect(output).toEqual(finalResult);
 		});
@@ -351,6 +362,7 @@ describe('> Refresh Token Handler', () => {
 
 			const result = await tokenHandler.validateOrRefreshAuthToken(token, refreshToken);
 
+			/* Assert */
 			expect(result.nextRefreshToken).toBeTruthy();
 			expect(result.nextRefreshToken).toBe(refreshToken);
 
@@ -376,13 +388,12 @@ describe('> Refresh Token Handler', () => {
 
 			const result = await tokenHandler.validateOrRefreshAuthToken(token, undefined).catch((error) => error);
 
+			/* Assert */
 			expect(result).toBeTruthy();
 			expect(result instanceof Error).toBe(true);
 		});
 
 		it('03. Should create a new token and refresh token if the token is expired and refresh token is available.', async () => {
-			const userId = '1234';
-
 			const token = await createAuthToken(
 				{
 					expiresIn: '1s',
@@ -413,6 +424,7 @@ describe('> Refresh Token Handler', () => {
 
 			const result = await tokenHandler.validateOrRefreshAuthToken(token, refreshToken).catch((error) => error);
 
+			/* Assert */
 			expect(result).not.toBeNull();
 
 			expect(result.nextRefreshToken).toBeTruthy();
