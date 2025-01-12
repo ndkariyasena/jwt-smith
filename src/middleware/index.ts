@@ -1,5 +1,5 @@
 import validateJwtHeaderMiddleware from './auth-header-verification.middleware';
 import roleBasedAuthenticationMiddleware from './role-based-authentication.middleware';
-import authenticateJwtMiddleware from './token-verification.middleware';
+import validateJwtCookieMiddleware from './auth-cookie-verification.middleware';
 
-export { validateJwtHeaderMiddleware, roleBasedAuthenticationMiddleware, authenticateJwtMiddleware };
+export { validateJwtHeaderMiddleware, roleBasedAuthenticationMiddleware, validateJwtCookieMiddleware };

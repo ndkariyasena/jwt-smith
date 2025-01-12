@@ -1,0 +1,224 @@
+import { NextFunction, Response } from 'express';
+import validateJwtCookieMiddleware from '../src/middleware/auth-cookie-verification.middleware';
+import DefaultTokenStorage from '../src/module/token-storage';
+import { AuthedRequest } from '../src/lib/custom';
+import { configure } from '../src/lib/core';
+import { sign } from '../src/lib/signing-token';
+
+jest.mock('../src/lib/logger', () => ({
+	log: jest.fn(),
+}));
+
+const Secret = 'SupperPass123';
+const userId = '1234';
+
+const createAuthToken = async (options = {}, payload = {}): Promise<string> => {
+	const token = (await sign({
+		payload,
+		secret: Secret,
+		options,
+	})) as unknown as string;
+
+	return token;
+};
+
+describe('> Auth Cookie Verification Middleware.', () => {
+	let mockRequest: Partial<AuthedRequest>;
+	let mockResponse: Partial<Response>;
+	let mockNext: jest.Mock<NextFunction>;
+
+	beforeEach(() => {
+		mockRequest = {};
+		mockResponse = {
+			status: jest.fn().mockReturnThis(),
+			json: jest.fn(),
+			setHeader: jest.fn(),
+			cookie: jest.fn(),
+			sendStatus: jest.fn(),
+		};
+		mockNext = jest.fn();
+
+		configure({
+			publicKey: Secret,
+		});
+	});
+
+	afterEach(() => {
+		jest.restoreAllMocks();
+
+		configure({
+			cookieSettings: {
+				accessTokenCookieName: undefined,
+				refreshTokenCookieName: undefined,
+			},
+		});
+	});
+
+	it('01. Should throw an error if the auth cookie is not found.', async () => {
+		await validateJwtCookieMiddleware(mockRequest as AuthedRequest, mockResponse as Response, mockNext);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(401);
+		expect(mockResponse.json).toHaveBeenCalledWith({
+			message: 'Unauthorized',
+			error: 'Auth cookie not found!',
+		});
+	});
+
+	it('02. Should throw an error if the auth cookie is invalid and the refresh token is not found.', async () => {
+		const accessTokenCookieName = 'auth-token';
+
+		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId } });
+
+		await new Promise((resolve) => setTimeout(resolve, 100));
+
+		mockRequest.cookies = {
+			[accessTokenCookieName]: token,
+		};
+
+		configure({
+			middlewareConfigs: {
+				tokenGenerationHandler: jest.fn(),
+			},
+			cookieSettings: {
+				accessTokenCookieName,
+			},
+		});
+
+		await validateJwtCookieMiddleware(mockRequest as AuthedRequest, mockResponse as Response, mockNext);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(401);
+		expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Unauthorized', error: 'jwt expired' });
+		expect(mockNext).not.toHaveBeenCalled();
+	});
+
+	it('03. Should throw an error if the auth cookie is invalid and the refresh cookie is invalid.', async () => {
+		const accessTokenCookieName = 'auth-token';
+		const refreshTokenCookieName = 'refresh-token';
+
+		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId } });
+		const refreshToken = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId } });
+
+		await new Promise((resolve) => setTimeout(resolve, 100));
+
+		mockRequest.cookies = {
+			[accessTokenCookieName]: token,
+			[refreshTokenCookieName]: refreshToken,
+		};
+
+		configure({
+			middlewareConfigs: {
+				tokenGenerationHandler: jest.fn(),
+			},
+			cookieSettings: {
+				accessTokenCookieName,
+				refreshTokenCookieName,
+			},
+		});
+
+		await validateJwtCookieMiddleware(mockRequest as AuthedRequest, mockResponse as Response, mockNext);
+
+		expect(mockResponse.status).toHaveBeenCalledWith(401);
+		expect(mockResponse.json).toHaveBeenCalledWith({ message: 'Unauthorized', error: 'jwt expired' });
+		expect(mockNext).not.toHaveBeenCalled();
+	});
+
+	it('04. Should generate a new token if the auth cookie expired and the refresh-cookie is valid.', async () => {
+		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId }, version: 'v1' });
+		const refreshToken = await createAuthToken({ expiresIn: '1m' }, { user: { id: userId } });
+
+		const newToken = await createAuthToken({ expiresIn: '1m' }, { user: { id: userId }, version: 'v2' });
+
+		await new Promise((resolve) => setTimeout(resolve, 100));
+
+		const accessTokenCookieName = 'auth-token';
+		const refreshTokenCookieName = 'refresh-token';
+		const refreshCookieOptions = {};
+
+		mockRequest.cookies = {
+			[accessTokenCookieName]: token,
+			[refreshTokenCookieName]: refreshToken,
+		};
+
+		const tokenGenerationOutput = {
+			token: newToken,
+			refreshToken: 'new-refresh-token',
+		};
+
+		const tokenStorage = new DefaultTokenStorage();
+		tokenStorage.saveOrUpdateToken(userId, refreshToken);
+
+		configure({
+			tokenStorage,
+			middlewareConfigs: {
+				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
+			},
+			cookieSettings: {
+				accessTokenCookieName,
+				refreshTokenCookieName,
+				refreshCookieOptions,
+			},
+		});
+
+		await validateJwtCookieMiddleware(mockRequest as AuthedRequest, mockResponse as Response, mockNext);
+
+		expect(mockNext).toHaveBeenCalled();
+		expect(mockResponse.cookie).toHaveBeenCalledWith(
+			accessTokenCookieName,
+			tokenGenerationOutput.token,
+			refreshCookieOptions,
+		);
+		expect(mockResponse.cookie).toHaveBeenCalledWith(
+			refreshTokenCookieName,
+			tokenGenerationOutput.refreshToken,
+			refreshCookieOptions,
+		);
+	});
+
+	it('05. Should update the request object with append-to-request values.', async () => {
+		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId }, version: 'v1' });
+		const refreshToken = await createAuthToken({ expiresIn: '1m' }, { user: { id: userId } });
+
+		const newToken = await createAuthToken(
+			{ expiresIn: '1m' },
+			{ user: { id: userId }, role: 'TestUser', version: 'v2' },
+		);
+
+		await new Promise((resolve) => setTimeout(resolve, 100));
+
+		const accessTokenCookieName = 'auth-token';
+		const refreshTokenCookieName = 'refresh-token';
+		const refreshCookieOptions = {};
+
+		mockRequest.cookies = {
+			[accessTokenCookieName]: token,
+			[refreshTokenCookieName]: refreshToken,
+		};
+
+		const tokenGenerationOutput = {
+			token: newToken,
+			refreshToken: 'new-refresh-token',
+		};
+
+		const tokenStorage = new DefaultTokenStorage();
+		tokenStorage.saveOrUpdateToken(userId, refreshToken);
+
+		configure({
+			tokenStorage,
+			middlewareConfigs: {
+				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
+				appendToRequest: ['user', 'role'],
+			},
+			cookieSettings: {
+				accessTokenCookieName,
+				refreshTokenCookieName,
+				refreshCookieOptions,
+			},
+		});
+
+		await validateJwtCookieMiddleware(mockRequest as AuthedRequest, mockResponse as Response, mockNext);
+
+		expect(mockNext).toHaveBeenCalled();
+		expect(mockRequest.user).toEqual({ id: userId });
+		expect(mockRequest.role).toEqual('TestUser');
+	});
+});

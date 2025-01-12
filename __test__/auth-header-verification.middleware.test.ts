@@ -46,10 +46,22 @@ describe('> Auth Header Verification Middleware.', () => {
 	afterEach(() => {
 		jest.restoreAllMocks();
 
-		configure({});
+		configure({
+			tokenStorage: undefined,
+			middlewareConfigs: {
+				authHeaderName: undefined,
+				refreshTokenHeaderName: undefined,
+				tokenGenerationHandler: jest.fn(),
+				appendToRequest: undefined,
+			},
+			cookieSettings: {
+				refreshTokenCookieName: undefined,
+				refreshCookieOptions: undefined,
+			},
+		});
 	});
 
-	it('01. should throw an error if the auth header is not found.', async () => {
+	it('01. Should throw an error if the auth header is not found.', async () => {
 		mockRequest.headers = {};
 
 		await validateJwtHeaderMiddleware(mockRequest as AuthedRequest, mockResponse as Response, mockNext);
@@ -59,7 +71,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		expect(mockNext).not.toHaveBeenCalled();
 	});
 
-	it('02. should throw an error if the auth header does not start with "Bearer ".', async () => {
+	it('02. Should throw an error if the auth header does not start with "Bearer ".', async () => {
 		const authHeaderName = 'authorization';
 		mockRequest.headers = {
 			[authHeaderName]: 'TBearer xxx.yyy.zzz',
@@ -79,7 +91,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		expect(mockNext).not.toHaveBeenCalled();
 	});
 
-	it('03. should throw an error if the auth token value is not found.', async () => {
+	it('03. Should throw an error if the auth token value is not found.', async () => {
 		const authHeaderName = 'authorization';
 		mockRequest.headers = {
 			[authHeaderName]: 'Bearer ',
@@ -99,7 +111,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		expect(mockNext).not.toHaveBeenCalled();
 	});
 
-	it('04. should throw an error if the token expired and the refresh token is not found.', async () => {
+	it('04. Should throw an error if the token expired and the refresh token is not found.', async () => {
 		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId } });
 
 		await new Promise((resolve) => setTimeout(resolve, 100));
@@ -124,7 +136,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		expect(mockNext).not.toHaveBeenCalled();
 	});
 
-	it('05. should throw an error if the token expired and the refresh-header token is invalid.', async () => {
+	it('05. Should throw an error if the token expired and the refresh-header token is invalid.', async () => {
 		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId } });
 		const refreshToken = await createAuthToken({ expiresIn: '20ms' }, { user: { id: userId } });
 
@@ -153,7 +165,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		expect(mockNext).not.toHaveBeenCalled();
 	});
 
-	it('06. should throw an error if the token expired and the refresh-cookie token is invalid.', async () => {
+	it('06. Should throw an error if the token expired and the refresh-cookie token is invalid.', async () => {
 		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId } });
 		const refreshToken = await createAuthToken({ expiresIn: '20ms' }, { user: { id: userId } });
 
@@ -187,7 +199,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		expect(mockNext).not.toHaveBeenCalled();
 	});
 
-	it('07. should generate a new token if the token expired and the refresh-header token is valid.', async () => {
+	it('07. Should generate a new token if the token expired and the refresh-header token is valid.', async () => {
 		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId }, version: 'v1' });
 		const refreshToken = await createAuthToken({ expiresIn: '1m' }, { user: { id: userId } });
 
@@ -230,7 +242,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		expect(mockResponse.setHeader).toHaveBeenCalledWith(refreshTokenHeaderName, tokenGenerationOutput.refreshToken);
 	});
 
-	it('08. should generate a new token if the token expired and the refresh-token token is valid.', async () => {
+	it('08. Should generate a new token if the token expired and the refresh-token is valid.', async () => {
 		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId }, version: 'v1' });
 		const refreshToken = await createAuthToken({ expiresIn: '1m' }, { user: { id: userId } });
 
@@ -282,7 +294,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		);
 	});
 
-	it('09. should update the request object with append-to-request values.', async () => {
+	it('09. Should update the request object with append-to-request values.', async () => {
 		const token = await createAuthToken({ expiresIn: '10ms' }, { user: { id: userId }, version: 'v1' });
 		const refreshToken = await createAuthToken({ expiresIn: '1m' }, { user: { id: userId } });
 
