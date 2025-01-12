@@ -98,9 +98,10 @@ export const defaultRefreshTokenHolderVerifier: RefreshTokenHolderVerifier = asy
 		string,
 		unknown
 	>;
-	const userId = user?.id;
+	const userId = user?.id || user?.userId;
+	const tokenHolderId = tokenHolder?.id || tokenHolder?.userId;
 
-	return tokenHolder.id === userId;
+	return tokenHolderId === userId;
 };
 
 export const defaultExtractApiVersion: ExtractApiVersion = async (req: AuthedRequest): Promise<string | undefined> => {

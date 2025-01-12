@@ -133,6 +133,7 @@ export type AuthedRequest = RequestAppends & Request;
 
 export interface MiddlewareConfigsOptions {
 	authHeaderName?: string;
+	refreshTokenHeaderName?: string;
 	appendToRequest?: AppendToRequest;
 	cookies?: CookieSettings;
 	authTokenExtractor?: (header: string) => string | undefined;

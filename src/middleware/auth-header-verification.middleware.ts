@@ -9,7 +9,13 @@ import { appendTokenPayloadToRequest } from '../helper/utils';
 
 const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {
 	try {
-		const { appendToRequest = [], authHeaderName, authTokenExtractor, tokenGenerationHandler } = middlewareConfigs;
+		const {
+			appendToRequest = [],
+			authHeaderName,
+			refreshTokenHeaderName,
+			authTokenExtractor,
+			tokenGenerationHandler,
+		} = middlewareConfigs;
 		let authHeader = req.headers[authHeaderName ?? ''];
 
 		if (Array.isArray(authHeader)) authHeader = authHeader.join('__');
@@ -25,10 +31,14 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 				throw new Error('Auth token not found');
 			}
 
-			const refreshToken =
+			let refreshToken =
 				req.cookies && cookieSettings.refreshTokenCookieName
 					? req.cookies[cookieSettings.refreshTokenCookieName]
 					: undefined;
+
+			if (!refreshToken && refreshTokenHeaderName) {
+				refreshToken = req.headers[refreshTokenHeaderName];
+			}
 
 			const refreshTokenHandler = new TokenHandler({
 				refreshTokenStorage: tokenStorage,
@@ -53,6 +63,9 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 			if (cookieSettings.refreshTokenCookieName && nextRefreshToken) {
 				log('debug', 'New refresh token set in the cookie.');
 				res.cookie(cookieSettings.refreshTokenCookieName, nextRefreshToken, cookieSettings.refreshCookieOptions || {});
+			} else if (refreshTokenHeaderName && nextRefreshToken) {
+				log('debug', 'New refresh token set in the header.');
+				res.setHeader(refreshTokenHeaderName, nextRefreshToken);
 			}
 
 			return next();
