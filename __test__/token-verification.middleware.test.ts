@@ -219,4 +219,26 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		expect(mockRequest.user).toEqual({ id: userId });
 		expect(mockRequest.role).toEqual('TestUser');
 	});
+
+	it('06. Should proceed to next middleware if the auth cookie is valid.', async () => {
+		const token = await createAuthToken({ expiresIn: '1m' }, { user: { id: userId } });
+
+		const accessTokenCookieName = 'auth-token';
+
+		mockRequest.cookies = {
+			[accessTokenCookieName]: token,
+		};
+
+		configure({
+			cookieSettings: {
+				accessTokenCookieName,
+			},
+		});
+
+		await validateJwtCookieMiddleware(mockRequest as AuthedRequest, mockResponse as Response, mockNext);
+
+		expect(mockNext).toHaveBeenCalled();
+		expect(mockResponse.status).not.toHaveBeenCalled();
+		expect(mockResponse.json).not.toHaveBeenCalled();
+	});
 });

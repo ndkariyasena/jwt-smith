@@ -20,25 +20,31 @@ const createAuthToken = async (options = {}, payload = {}): Promise<string> => {
 	return token;
 };
 
+const setupMocks = () => {
+	const mockRequest: Partial<AuthedRequest> = {};
+	const mockResponse: Partial<Response> = {
+		status: jest.fn().mockReturnThis(),
+		json: jest.fn(),
+		setHeader: jest.fn(),
+		cookie: jest.fn(),
+		sendStatus: jest.fn(),
+	};
+	const mockNext = jest.fn();
+
+	configure({
+		publicKey: Secret,
+	});
+
+	return { mockRequest, mockResponse, mockNext };
+};
+
 describe('> Auth Header Verification Middleware.', () => {
 	let mockRequest: Partial<AuthedRequest>;
 	let mockResponse: Partial<Response>;
 	let mockNext: jest.Mock<NextFunction>;
 
 	beforeEach(() => {
-		mockRequest = {};
-		mockResponse = {
-			status: jest.fn().mockReturnThis(),
-			json: jest.fn(),
-			setHeader: jest.fn(),
-			cookie: jest.fn(),
-			sendStatus: jest.fn(),
-		};
-		mockNext = jest.fn();
-
-		configure({
-			publicKey: Secret,
-		});
+		({ mockRequest, mockResponse, mockNext } = setupMocks());
 	});
 
 	afterEach(() => {
@@ -342,5 +348,28 @@ describe('> Auth Header Verification Middleware.', () => {
 		expect(mockNext).toHaveBeenCalled();
 		expect(mockRequest.user).toEqual({ id: userId });
 		expect(mockRequest.role).toEqual('TestUser');
+	});
+
+	it('10. Should proceed if the token is valid and no refresh token is needed.', async () => {
+		const token = await createAuthToken({ expiresIn: '1m' }, { user: { id: userId } });
+
+		const authHeaderName = 'authorization';
+
+		mockRequest.headers = {
+			[authHeaderName]: `Bearer ${token}`,
+		};
+
+		configure({
+			middlewareConfigs: {
+				authHeaderName,
+				tokenGenerationHandler: jest.fn(),
+			},
+		});
+
+		await validateJwtHeaderMiddleware(mockRequest as AuthedRequest, mockResponse as Response, mockNext);
+
+		expect(mockNext).toHaveBeenCalled();
+		expect(mockResponse.status).not.toHaveBeenCalled();
+		expect(mockResponse.json).not.toHaveBeenCalled();
 	});
 });

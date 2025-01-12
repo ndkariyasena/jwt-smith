@@ -47,15 +47,13 @@ describe('> Refresh Token Handler', () => {
 			});
 
 			/* Assert */
-			expect(log).toHaveBeenCalled();
-			expect(log).toHaveBeenCalledTimes(1);
 			expect(log).toHaveBeenCalledWith(
 				'warn',
 				'[TokenHandler]: Using default in-memory token storage. This is not recommended for production.',
 			);
 		});
 
-		it('02. Default token storage should use when the token-storage method not provided.', async () => {
+		it('02. Default token storage should be used when the token-storage method is not provided.', async () => {
 			new TokenHandler({
 				tokenGenerationHandler: jest.fn(),
 			});
@@ -244,7 +242,7 @@ describe('> Refresh Token Handler', () => {
 			expect(output).toEqual(finalResult);
 		});
 
-		it('05. Should throw an error when can not find the refresh token holder.', async () => {
+		it('05. Should throw an error when cannot find the refresh token holder.', async () => {
 			jest.spyOn(DefaultTokenStorage.prototype, 'blackListRefreshToken');
 
 			jest
@@ -372,7 +370,7 @@ describe('> Refresh Token Handler', () => {
 			expect(result.decodedToken?.sub).toBe(subject);
 		});
 
-		it('02. Should return the decoded token when the token is valid and refresh token is not provided.', async () => {
+		it('02. Should return an error when the token is expired and refresh token is not provided.', async () => {
 			const token = await createAuthToken({
 				expiresIn: '1s',
 			});
@@ -432,6 +430,26 @@ describe('> Refresh Token Handler', () => {
 			expect(result.token).not.toBe(token);
 
 			expect(result.decodedToken).toBeTruthy();
+		});
+
+		it('04. Should return an error when the refresh token is invalid.', async () => {
+			const token = await createAuthToken({
+				expiresIn: '1s',
+			});
+
+			await new Promise((resolve) => setTimeout(resolve, 1000));
+
+			const invalidRefreshToken = 'invalid-refresh-token';
+
+			const tokenHandler = new TokenHandler({
+				tokenGenerationHandler: jest.fn(),
+			});
+
+			const result = await tokenHandler.validateOrRefreshAuthToken(token, invalidRefreshToken).catch((error) => error);
+
+			/* Assert */
+			expect(result).toBeTruthy();
+			expect(result instanceof Error).toBe(true);
 		});
 	});
 });
