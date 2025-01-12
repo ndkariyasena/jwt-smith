@@ -5,9 +5,7 @@ import { AuthedRequest } from '../src/lib/custom';
 import { configure } from '../src/lib/core';
 import { sign } from '../src/lib/signing-token';
 
-jest.mock('../src/lib/logger', () => ({
-	log: jest.fn(),
-}));
+jest.mock('../src/lib/logger');
 
 const Secret = 'SupperPass123';
 const userId = '1234';

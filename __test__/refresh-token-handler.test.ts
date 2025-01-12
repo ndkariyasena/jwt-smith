@@ -7,10 +7,7 @@ import { configure } from '../src/index';
 import * as utils from '../src/helper/utils';
 
 jest.mock('../src/module/token-storage');
-
-jest.mock('../src/lib/logger', () => ({
-	log: jest.fn(),
-}));
+jest.mock('../src/lib/logger');
 
 const Secret = 'SupperPass123';
 const userId = '1234';
