@@ -121,7 +121,7 @@ export interface MiddlewareConfigsOptions {
 	authHeaderName?: string;
 	refreshTokenHeaderName?: string;
 	appendToRequest?: AppendToRequest;
-	cookies?: CookieSettings;
+	cookieSettings?: CookieSettings;
 	authTokenExtractor?: (header: string) => string | undefined;
 	tokenGenerationHandler: TokenGenerationHandler;
 	authTokenPayloadVerifier?: AuthTokenPayloadVerifier;
