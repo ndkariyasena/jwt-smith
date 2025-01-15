@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
       - name: Checkout v3
@@ -23,7 +23,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          cache: 'npm'
 
       - name: Npm install
         run: npm install --frozen-lockfile
@@ -31,6 +31,5 @@ jobs:
       - name: Tests starting
         run: npm test
 
-      # - name: Test coverage Check
-      #   run: npm test --coverage
-
+      - name: Test coverage Check
+        run: npm test --coverage
