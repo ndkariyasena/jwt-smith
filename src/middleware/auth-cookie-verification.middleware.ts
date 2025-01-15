@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { middlewareConfigs, tokenStorage } from 'src/lib/core';
-import { log } from 'src/lib/logger';
-import { cookieSettings } from 'src/lib/core';
-import { appendTokenPayloadToRequest } from 'src/helper/utils';
-import { TokenHandler } from 'src/module/refresh-token-handler';
+import { middlewareConfigs, tokenStorage } from '../lib/core';
+import { log } from '../lib/logger';
+import { cookieSettings } from '../lib/core';
+import { appendTokenPayloadToRequest } from '../helper/utils';
+import { TokenHandler } from '../module/refresh-token-handler';
 
-const authenticateJwtMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+const validateJwtCookieMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
 		const { appendToRequest = [], tokenGenerationHandler } = middlewareConfigs;
 
@@ -44,21 +44,21 @@ const authenticateJwtMiddleware = async (req: Request, res: Response, next: Next
 
 		if (cookieSettings.accessTokenCookieName) {
 			log('debug', 'New access token set in the cookie.');
-
 			res.cookie(cookieSettings.accessTokenCookieName, token, cookieSettings.accessCookieOptions || {});
 		}
 
 		if (cookieSettings.refreshTokenCookieName && nextRefreshToken) {
 			log('debug', 'New refresh token set in the cookie.');
-
 			res.cookie(cookieSettings.refreshTokenCookieName, nextRefreshToken, cookieSettings.refreshCookieOptions || {});
 		}
 
 		next();
 	} catch (error) {
 		log('error', 'Error occurred while authenticating the JST token.', error);
-		res.sendStatus(401);
+
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+		res.status(401).json({ message: 'Unauthorized', error: errorMessage });
 	}
 };
 
-export default authenticateJwtMiddleware;
+export default validateJwtCookieMiddleware;

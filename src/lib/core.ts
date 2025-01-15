@@ -19,16 +19,16 @@ import {
 	extractAuthHeaderValue,
 	defaultRefreshTokenPayloadVerifier,
 	defaultRefreshTokenHolderVerifier,
-} from 'src/helper/utils';
+} from '../helper/utils';
 
 export let tokenStorage: TokenStorage;
 export let sessionStorage: SessionStorage;
 export let publicKey: Secret | PublicKey;
 export let refreshTokenKey: Secret | PublicKey;
 export let cookieSettings: CookieSettings = {
-	accessTokenCookieName: 'accessToken',
+	accessTokenCookieName: undefined,
 	accessCookieOptions: {},
-	refreshTokenCookieName: 'refreshToken',
+	refreshTokenCookieName: undefined,
 };
 export let middlewareConfigs: MiddlewareConfigsOptions = {
 	authHeaderName: 'authorization',

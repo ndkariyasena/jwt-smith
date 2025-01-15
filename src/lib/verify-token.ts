@@ -27,7 +27,7 @@ const verifyTokenOptionsSchema = Joi.object<VerifyTokenOptions>({
 });
 
 const secretSchema = Joi.alternatives().try(
-	Joi.string(),
+	Joi.string().not(''),
 	Joi.binary(),
 	Joi.object().instance(Buffer),
 	Joi.object({

@@ -2,17 +2,17 @@ import { Response, NextFunction } from 'express';
 import fs from 'node:fs/promises';
 import Joi from 'joi';
 
-import { AuthedRequest } from 'src/lib/custom';
-import { log } from 'src/lib/logger';
-import { RolePermissionConfigFilePath } from 'src/helper/constants';
+import { AuthedRequest } from '../lib/custom';
+import { log } from '../lib/logger';
+import { RolePermissionConfigFilePath } from '../helper/constants';
 import {
 	EndPointConfig,
 	EndPointsPermissionConfig,
 	PermissionsConfiguration,
 	PermissionsSet,
 	RolesSet,
-} from 'src/module/internal';
-import { middlewareConfigs } from 'src/lib/core';
+} from '../module/internal';
+import { middlewareConfigs } from '../lib/core';
 
 const permissionSchema = Joi.object({
 	roles: Joi.array().items(Joi.string().required()).required(),

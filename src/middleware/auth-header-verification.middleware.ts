@@ -1,34 +1,44 @@
 import { NextFunction, Response } from 'express';
 
-import { middlewareConfigs, tokenStorage } from 'src/lib/core';
-import { AuthedRequest } from 'src/lib/custom';
-import { log } from 'src/lib/logger';
-import { cookieSettings } from 'src/lib/core';
-import { TokenHandler } from 'src/module/refresh-token-handler';
-import { appendTokenPayloadToRequest } from 'src/helper/utils';
+import { middlewareConfigs, tokenStorage } from '../lib/core';
+import { AuthedRequest } from '../lib/custom';
+import { log } from '../lib/logger';
+import { cookieSettings } from '../lib/core';
+import { TokenHandler } from '../module/refresh-token-handler';
+import { appendTokenPayloadToRequest } from '../helper/utils';
 
 const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {
 	try {
-		const { appendToRequest = [], authHeaderName, authTokenExtractor, tokenGenerationHandler } = middlewareConfigs;
+		const {
+			appendToRequest = [],
+			authHeaderName,
+			refreshTokenHeaderName,
+			authTokenExtractor,
+			tokenGenerationHandler,
+		} = middlewareConfigs;
 		let authHeader = req.headers[authHeaderName ?? ''];
 
 		if (Array.isArray(authHeader)) authHeader = authHeader.join('__');
 
 		if (!authHeader || !authHeader.startsWith('Bearer ')) {
-			throw new Error('Valid auth header not found!');
+			throw new Error('Valid auth header not found');
 		}
 
 		if (authTokenExtractor) {
 			const tokenValue = authTokenExtractor(authHeader);
 
 			if (!tokenValue) {
-				throw new Error('Auth token not found.');
+				throw new Error('Auth token not found');
 			}
 
-			const refreshToken =
+			let refreshToken =
 				req.cookies && cookieSettings.refreshTokenCookieName
 					? req.cookies[cookieSettings.refreshTokenCookieName]
 					: undefined;
+
+			if (!refreshToken && refreshTokenHeaderName) {
+				refreshToken = req.headers[refreshTokenHeaderName];
+			}
 
 			const refreshTokenHandler = new TokenHandler({
 				refreshTokenStorage: tokenStorage,
@@ -53,15 +63,20 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 			if (cookieSettings.refreshTokenCookieName && nextRefreshToken) {
 				log('debug', 'New refresh token set in the cookie.');
 				res.cookie(cookieSettings.refreshTokenCookieName, nextRefreshToken, cookieSettings.refreshCookieOptions || {});
+			} else if (refreshTokenHeaderName && nextRefreshToken) {
+				log('debug', 'New refresh token set in the header.');
+				res.setHeader(refreshTokenHeaderName, nextRefreshToken);
 			}
 
-			next();
+			return next();
 		} else {
-			throw new Error('Token value extractor method not found.');
+			throw new Error('Token value extractor method not found');
 		}
 	} catch (error) {
 		log('error', 'Error occurred while authenticating the JST token.', error);
-		res.sendStatus(401);
+
+		const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+		res.status(401).json({ message: 'Unauthorized', error: errorMessage });
 	}
 };
 
