@@ -1,7 +1,6 @@
 import Joi from 'joi';
 import {
 	TokenStorage,
-	SessionStorage,
 	Logger,
 	PublicKey,
 	Secret,
@@ -22,7 +21,6 @@ import {
 } from '../helper/utils';
 
 export let tokenStorage: TokenStorage;
-export let sessionStorage: SessionStorage;
 export let publicKey: Secret | PublicKey;
 export let refreshTokenKey: Secret | PublicKey;
 export let cookieSettings: CookieSettings = {
@@ -43,7 +41,6 @@ export let middlewareConfigs: MiddlewareConfigsOptions = {
 
 interface ConfigOptions {
 	tokenStorage?: TokenStorage;
-	sessionStorage?: SessionStorage;
 	logger?: Logger;
 	publicKey?: Secret | PublicKey;
 	refreshTokenKey?: Secret | PublicKey;
@@ -65,7 +62,6 @@ const secretSchema = Joi.alternatives().try(
 
 const configOptionsSchema = Joi.object<ConfigOptions>({
 	tokenStorage: Joi.object<TokenStorage>().optional(),
-	sessionStorage: Joi.object<SessionStorage>().optional(),
 	logger: Joi.object<Logger>().optional(),
 	publicKey: secretSchema.optional(),
 	refreshTokenKey: secretSchema.optional(),
@@ -86,7 +82,6 @@ export const configure = (options: ConfigOptions) => {
 
 	if (value.logger) setLogger(value.logger);
 	if (value.tokenStorage) tokenStorage = value.tokenStorage;
-	if (value.sessionStorage) sessionStorage = value.sessionStorage;
 
 	if (value.publicKey) publicKey = value.publicKey;
 	if (value.refreshTokenKey) refreshTokenKey = value.refreshTokenKey;

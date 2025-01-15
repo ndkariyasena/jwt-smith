@@ -36,8 +36,6 @@ export type PrivateKey = PrivateKeyInput | string | Buffer | JsonWebKeyInput;
 
 export type PublicKey = PublicKeyInput | string | Buffer | KeyObject | JsonWebKeyInput;
 
-export type Session = string | string[] | Record<string, unknown> | Record<string, unknown>[];
-
 export type VerifyResponse = string | Jwt | JwtPayload | undefined;
 
 export type AppendToRequestProperties = 'user' | 'role' | 'language' | 'tokenPayload';
@@ -107,12 +105,6 @@ export interface TokenStorage {
 	deleteToken: (userId: string, token?: string, refreshToken?: string) => Promise<void>;
 	blackListRefreshToken: (token: string, relatedData?: Record<string, unknown>) => Promise<void>;
 	checkBlackListedRefreshToken: (token: string) => Promise<Record<string, unknown> | undefined>;
-}
-
-export interface SessionStorage {
-	getSession: (sessionId: string) => Promise<Session | null>;
-	saveSession: (sessionId: string, session: Session) => Promise<void>;
-	deleteSession: (sessionId: string) => Promise<void>;
 }
 
 export interface CookieSettings {

@@ -1,8 +1,13 @@
 name: CI
+
 on:
   push:
     branches:
-      - "**"
+      - '**'
+  pull_request:
+    branches:
+      - main
+      - 'releases/**'
 
 jobs:
   lint-n-build:
@@ -11,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x, 20.x, 22.x]
 
     steps:
       - name: Checkout v3
@@ -21,7 +26,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: "npm"
+          cache: 'npm'
 
       - run: npm install --frozen-lockfile
-      - run: npm run lint && npm run build
+      - run: npm run lint:all && npm run build
