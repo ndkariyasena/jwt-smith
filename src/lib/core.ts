@@ -6,7 +6,6 @@ import {
 	Secret,
 	SignTokenOptions,
 	VerifyTokenOptions,
-	CookieSettings,
 	MiddlewareConfigsOptions,
 } from './custom.d';
 import { log, logFormat, setLogger } from './logger';
@@ -23,15 +22,10 @@ import {
 export let tokenStorage: TokenStorage;
 export let publicKey: Secret | PublicKey;
 export let refreshTokenKey: Secret | PublicKey;
-export let cookieSettings: CookieSettings = {
-	accessTokenCookieName: undefined,
-	accessCookieOptions: {},
-	refreshTokenCookieName: undefined,
-};
 export let middlewareConfigs: MiddlewareConfigsOptions = {
 	authHeaderName: 'authorization',
 	appendToRequest: [],
-	cookies: { accessTokenCookieName: 'accessToken', accessCookieOptions: {}, refreshTokenCookieName: undefined },
+	cookieSettings: { accessTokenCookieName: 'accessToken', accessCookieOptions: {}, refreshTokenCookieName: undefined },
 	authTokenExtractor: extractAuthHeaderValue,
 	tokenGenerationHandler: defaultTokenGenerationHandler,
 	refreshTokenPayloadVerifier: defaultRefreshTokenPayloadVerifier,
@@ -46,7 +40,6 @@ interface ConfigOptions {
 	refreshTokenKey?: Secret | PublicKey;
 	signOptions?: SignTokenOptions;
 	verifyOptions?: VerifyTokenOptions;
-	cookieSettings?: CookieSettings;
 	middlewareConfigs?: MiddlewareConfigsOptions;
 }
 
@@ -67,7 +60,6 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
 	refreshTokenKey: secretSchema.optional(),
 	signOptions: Joi.object<SignTokenOptions>().optional(),
 	verifyOptions: Joi.object<VerifyTokenOptions>().optional(),
-	cookieSettings: Joi.object<CookieSettings>().optional(),
 	middlewareConfigs: Joi.object<MiddlewareConfigsOptions>().optional(),
 });
 
@@ -89,6 +81,5 @@ export const configure = (options: ConfigOptions) => {
 	if (value.signOptions) setDefaultSignOptions(value.signOptions);
 	if (value.verifyOptions) setDefaultVerifyOptions(value.verifyOptions);
 
-	if (value.cookieSettings) cookieSettings = { ...cookieSettings, ...value.cookieSettings };
 	if (value.middlewareConfigs) middlewareConfigs = { ...middlewareConfigs, ...value.middlewareConfigs };
 };

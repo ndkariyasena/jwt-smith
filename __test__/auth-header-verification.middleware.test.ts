@@ -57,10 +57,10 @@ describe('> Auth Header Verification Middleware.', () => {
 				refreshTokenHeaderName: undefined,
 				tokenGenerationHandler: jest.fn(),
 				appendToRequest: undefined,
-			},
-			cookieSettings: {
-				refreshTokenCookieName: undefined,
-				refreshCookieOptions: undefined,
+				cookieSettings: {
+					refreshTokenCookieName: undefined,
+					refreshCookieOptions: undefined,
+				},
 			},
 		});
 	});
@@ -190,9 +190,9 @@ describe('> Auth Header Verification Middleware.', () => {
 				authHeaderName,
 				refreshTokenHeaderName: undefined,
 				tokenGenerationHandler: jest.fn(),
-			},
-			cookieSettings: {
-				refreshTokenCookieName,
+				cookieSettings: {
+					refreshTokenCookieName,
+				},
 			},
 		});
 
@@ -233,9 +233,9 @@ describe('> Auth Header Verification Middleware.', () => {
 				authHeaderName,
 				refreshTokenHeaderName,
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
-			},
-			cookieSettings: {
-				refreshTokenCookieName: undefined,
+				cookieSettings: {
+					refreshTokenCookieName: undefined,
+				},
 			},
 		});
 
@@ -280,10 +280,10 @@ describe('> Auth Header Verification Middleware.', () => {
 				authHeaderName,
 				refreshTokenHeaderName: undefined,
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
-			},
-			cookieSettings: {
-				refreshTokenCookieName,
-				refreshCookieOptions,
+				cookieSettings: {
+					refreshTokenCookieName,
+					refreshCookieOptions,
+				},
 			},
 		});
 
@@ -336,10 +336,10 @@ describe('> Auth Header Verification Middleware.', () => {
 				refreshTokenHeaderName: undefined,
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
 				appendToRequest: ['user', 'role'],
-			},
-			cookieSettings: {
-				refreshTokenCookieName,
-				refreshCookieOptions,
+				cookieSettings: {
+					refreshTokenCookieName,
+					refreshCookieOptions,
+				},
 			},
 		});
 

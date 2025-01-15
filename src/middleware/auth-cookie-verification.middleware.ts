@@ -2,13 +2,12 @@ import { NextFunction, Request, Response } from 'express';
 
 import { middlewareConfigs, tokenStorage } from '../lib/core';
 import { log } from '../lib/logger';
-import { cookieSettings } from '../lib/core';
 import { appendTokenPayloadToRequest } from '../helper/utils';
 import { TokenHandler } from '../module/refresh-token-handler';
 
 const validateJwtCookieMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
-		const { appendToRequest = [], tokenGenerationHandler } = middlewareConfigs;
+		const { appendToRequest = [], tokenGenerationHandler, cookieSettings = {} } = middlewareConfigs;
 
 		const accessToken =
 			req.cookies && cookieSettings.accessTokenCookieName
