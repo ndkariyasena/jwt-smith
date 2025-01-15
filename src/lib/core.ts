@@ -20,14 +20,57 @@ import {
 	defaultRefreshTokenHolderVerifier,
 } from '../helper/utils';
 
+/**
+ * Token storage instance.
+ *
+ * @type TokenStorage
+ */
 export let tokenStorage: TokenStorage;
+
+/**
+ * Public key for token verification.
+ *
+ * @type Secret | PublicKey
+ */
 export let publicKey: Secret | PublicKey;
+
+/**
+ * Refresh token key for token verification.
+ *
+ * @type Secret | PublicKey
+ */
 export let refreshTokenKey: Secret | PublicKey;
+
+/**
+ * Default sign options.
+ *
+ * @type CookieSettings
+ * @property {string} accessTokenCookieName
+ * @property {CookieOptions} accessCookieOptions
+ * @property {string} refreshTokenCookieName
+ * @property {CookieOptions} refreshCookieOptions
+ */
 export let cookieSettings: CookieSettings = {
 	accessTokenCookieName: undefined,
 	accessCookieOptions: {},
 	refreshTokenCookieName: undefined,
+	refreshCookieOptions: {},
 };
+
+/**
+ * Middleware configurations.
+ * Defines the configurations for the middleware.
+ *
+ * @type {MiddlewareConfigsOptions}
+ * @property {string} authHeaderName
+ * @property {AppendToRequest} appendToRequest
+ * @property {CookieSettings} cookies
+ * @function {AuthTokenExtractor} authTokenExtractor
+ * @function {TokenGenerationHandler} tokenGenerationHandler
+ * @function {RefreshTokenPayloadVerifier} refreshTokenPayloadVerifier
+ * @function {RefreshTokenHolderVerifier} refreshTokenHolderVerifier
+ * @function {ExtractApiVersion} extractApiVersion
+ */
 export let middlewareConfigs: MiddlewareConfigsOptions = {
 	authHeaderName: 'authorization',
 	appendToRequest: [],
@@ -71,6 +114,46 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
 	middlewareConfigs: Joi.object<MiddlewareConfigsOptions>().optional(),
 });
 
+/**
+ * Configures the library with the provided options.
+ *
+ *
+ * @param {ConfigOptions} options
+ * @throws {Error} Parameter Validation Error
+ * @returns {void}
+ *
+ * @example
+ * ```typescript
+ * import { configure } from 'jwt-smith';
+ * configure({
+ *  tokenStorage: new TokenStorage(),
+ *  publicKey: 'public key',
+ *  refreshTokenKey: 'refresh token key',
+ *  signOptions: {
+ *   algorithm: 'RS256',
+ *   expiresIn: '1h',
+ *  },
+ *  verifyOptions: {
+ *   algorithms: ['RS256'],
+ *  },
+ *  cookieSettings: {
+ *   accessTokenCookieName: 'access_token
+ *   accessCookieOptions: {
+ *    httpOnly: true,
+ *    secure: true,
+ *   },
+ *   refreshTokenCookieName: 'refresh_token',
+ *   refreshCookieOptions: {
+ *    httpOnly: true,
+ *    secure: true,
+ *    },
+ *  },
+ *  middlewareConfigs: {
+ *  authHeaderName: 'authorization',
+ *  appendToRequest: ['user'],
+ *  cookies: {
+ *   accessTokenCookieName: 'access_token
+ */
 export const configure = (options: ConfigOptions) => {
 	const { error, warning, value } = configOptionsSchema.validate(options);
 
