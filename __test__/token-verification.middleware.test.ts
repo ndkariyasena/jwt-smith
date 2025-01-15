@@ -45,9 +45,12 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		jest.restoreAllMocks();
 
 		configure({
-			cookieSettings: {
-				accessTokenCookieName: undefined,
-				refreshTokenCookieName: undefined,
+			middlewareConfigs: {
+				tokenGenerationHandler: jest.fn(),
+				cookieSettings: {
+					accessTokenCookieName: undefined,
+					refreshTokenCookieName: undefined,
+				},
 			},
 		});
 	});
@@ -76,9 +79,9 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		configure({
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn(),
-			},
-			cookieSettings: {
-				accessTokenCookieName,
+				cookieSettings: {
+					accessTokenCookieName,
+				},
 			},
 		});
 
@@ -106,10 +109,10 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		configure({
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn(),
-			},
-			cookieSettings: {
-				accessTokenCookieName,
-				refreshTokenCookieName,
+				cookieSettings: {
+					accessTokenCookieName,
+					refreshTokenCookieName,
+				},
 			},
 		});
 
@@ -149,11 +152,11 @@ describe('> Auth Cookie Verification Middleware.', () => {
 			tokenStorage,
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
-			},
-			cookieSettings: {
-				accessTokenCookieName,
-				refreshTokenCookieName,
-				refreshCookieOptions,
+				cookieSettings: {
+					accessTokenCookieName,
+					refreshTokenCookieName,
+					refreshCookieOptions,
+				},
 			},
 		});
 
@@ -205,11 +208,11 @@ describe('> Auth Cookie Verification Middleware.', () => {
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
 				appendToRequest: ['user', 'role'],
-			},
-			cookieSettings: {
-				accessTokenCookieName,
-				refreshTokenCookieName,
-				refreshCookieOptions,
+				cookieSettings: {
+					accessTokenCookieName,
+					refreshTokenCookieName,
+					refreshCookieOptions,
+				},
 			},
 		});
 
@@ -230,8 +233,11 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		};
 
 		configure({
-			cookieSettings: {
-				accessTokenCookieName,
+			middlewareConfigs: {
+				tokenGenerationHandler: jest.fn(),
+				cookieSettings: {
+					accessTokenCookieName,
+				},
 			},
 		});
 
