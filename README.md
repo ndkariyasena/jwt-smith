@@ -1,4 +1,9 @@
-# jwt-smith
+<p align="center">
+  <img src="./static/240x240.png" width="240" alt="JWT-Smith Logo" />
+</p>
+<p align="center" style="color:#79effb; font-weight:600; font-size: 3rem">
+JWT Smith
+</p>
 
 Enhanced JWT Authentication and Authorization Module
 
@@ -46,7 +51,7 @@ Verifies a JWT token.
 
 ## Middleware
 
-### `authenticate(req, res, next)`
+### `validateJwtCookieMiddleware`
 
 Middleware to authenticate JWT tokens in requests.
 
