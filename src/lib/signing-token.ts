@@ -4,6 +4,14 @@ import Joi from 'joi';
 import { log, logFormat } from './logger';
 import { Algorithm, PrivateKey, Secret, SignTokenOptions } from './custom.d';
 
+/**
+ * Sign token parameters.
+ * The payload can be a string, object, or binary.
+ * The secret can be a string, binary, or object.
+ * The options are optional.
+ *
+ * @interface SignTokenParams
+ */
 interface SignTokenParams {
 	payload: string | Buffer | object;
 	secret: Secret | PrivateKey;
@@ -48,9 +56,25 @@ const signTokenParamsSchema = Joi.object<SignTokenParams>({
 let defaultSignOptions: SignTokenOptions = {};
 
 /**
+ * Signs a JSON Web Token (JWT) with the given parameters.
  *
- * @param parameters
- * @returns Promise<string | undefined>
+ * @param {SignTokenParams} parameters - The parameters for signing the token.
+ * @param {string | Buffer | object} parameters.payload - The payload to sign, which can be a string, object, or binary.
+ * @param {Secret | PrivateKey} parameters.secret - The secret or private key to sign the token with.
+ * @param {SignTokenOptions} [parameters.options] - Optional signing options.
+ * @returns {Promise<string | undefined>} A promise that resolves to the signed JWT as a string, or undefined if an error occurs.
+ *
+ * @throws {Error} If parameter validation fails.
+ *
+ * @example
+ * ```typescript
+ * const token = await sign({
+ *   payload: { userId: 123 },
+ *   secret: 'your-256-bit-secret',
+ *   options: { expiresIn: '1h' }
+ * });
+ * console.log(token);
+ * ```
  */
 export const sign = (parameters: SignTokenParams): Promise<string | undefined> => {
 	return new Promise((resolve, reject) => {
@@ -75,6 +99,17 @@ export const sign = (parameters: SignTokenParams): Promise<string | undefined> =
 	});
 };
 
+/**
+ * Sets the default signing options for tokens.
+ *
+ * This function validates the provided options against the `signTokenOptionsSchema`.
+ * If the validation fails, it throws an error with a detailed message.
+ * If there are any warnings during validation, it logs a warning message.
+ * Upon successful validation, it sets the `defaultSignOptions` to the validated value.
+ *
+ * @param options - The signing options to be validated and set as default.
+ * @throws {Error} If the validation of the options fails.
+ */
 export const setDefaultSignOptions = (options: SignTokenOptions): void => {
 	const { error, warning, value } = signTokenOptionsSchema.validate(options);
 

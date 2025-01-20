@@ -58,6 +58,26 @@ const getPermissionConfigs = async () => {
 	return JSON.parse(await fs.readFile(RolePermissionConfigFilePath, 'utf-8'));
 };
 
+/**
+ * Middleware to handle role-based authentication for endpoints.
+ *
+ * This middleware checks if the user has the required permissions to access a specific endpoint
+ * based on their role and the action they are trying to perform. It validates the permissions
+ * configuration file and matches the user's role and action against the defined permissions.
+ *
+ * @param requiredAction - The action that the user is trying to perform (e.g., 'read', 'write').
+ *
+ * @returns An Express middleware function that checks the user's permissions and either allows
+ *          the request to proceed or responds with an access denied error.
+ *
+ * @throws Will throw an error if the permissions configuration file is not found or is invalid.
+ *
+ * @example
+ * // Usage in an Express route
+ * app.get('/some-endpoint', roleBasedAuthenticationMiddleware('admin:read'), (req, res) => {
+ *   res.send('You have access to this endpoint');
+ * });
+ */
 const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 	return async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {
 		const { extractApiVersion } = middlewareConfigs;

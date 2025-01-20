@@ -15,7 +15,16 @@ let logSettings: LoggerOptions = {
 };
 
 /**
- * Sets a custom logger. The provided logger should have 'info', 'warn', 'error', and 'debug' methods.
+ * Sets the logger to be used by the library.
+ * The logger should implement the Logger interface.
+ * The logger should have the following methods:
+ * - info
+ * - warn
+ * - error
+ * - debug
+ *
+ * @param {Logger} logger
+ * @param {LoggerOptions} [options]
  */
 export const setLogger = (logger: Logger, options?: LoggerOptions): void => {
 	currentLogger = logger;
@@ -27,21 +36,34 @@ export const setLogger = (logger: Logger, options?: LoggerOptions): void => {
 };
 
 /**
- * Gets the current logger. Defaults to `console` if no custom logger is set.
+ * Returns the current logger.
+ * The logger can be the default console logger or a custom logger.
+ * The logger should implement the Logger interface.
+ *
+ * @return {*}  {Logger}
  */
 export const getLogger = (): Logger => {
 	return currentLogger;
 };
 
 /**
- * Format log messages. This function formats a given log message based on the logSettings configuration.
+ * Formats a log message.
+ * If the setPrefix option is true, the message is prefixed with the LOGGER_PREFIX.
+ *
+ * @param {string} message
+ * @return {*}  {string}
  */
 export const logFormat = (message: string): string => {
 	return `${logSettings.setPrefix ? LOGGER_PREFIX : ''}${message}`;
 };
 
 /**
- * Logs a message at a specified level using the current logger.
+ * Logs a message with the given log level.
+ * The message is formatted using the logFormat function.
+ *
+ * @param {LogLevel} level
+ * @param {string} message
+ * @param {...unknown[]} args
  */
 export const log = (level: LogLevel, message: string, ...args: unknown[]): void => {
 	const logger = getLogger();
