@@ -2,7 +2,7 @@ import { NextFunction, Response } from 'express';
 import validateJwtHeaderMiddleware from '../src/middleware/auth-header-verification.middleware';
 import DefaultTokenStorage from '../src/module/token-storage';
 import { AuthedRequest } from '../src/lib/custom';
-import { configure } from '../src/lib/core';
+import { JwtManager } from '../src/lib/core';
 import { sign } from '../src/lib/signing-token';
 
 jest.mock('../src/lib/logger');
@@ -31,7 +31,7 @@ const setupMocks = () => {
 	};
 	const mockNext = jest.fn();
 
-	configure({
+	JwtManager({
 		publicKey: Secret,
 	});
 
@@ -50,7 +50,7 @@ describe('> Auth Header Verification Middleware.', () => {
 	afterEach(() => {
 		jest.restoreAllMocks();
 
-		configure({
+		JwtManager({
 			tokenStorage: undefined,
 			middlewareConfigs: {
 				authHeaderName: undefined,
@@ -81,7 +81,7 @@ describe('> Auth Header Verification Middleware.', () => {
 			[authHeaderName]: 'TBearer xxx.yyy.zzz',
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				authHeaderName,
 				tokenGenerationHandler: jest.fn(),
@@ -101,7 +101,7 @@ describe('> Auth Header Verification Middleware.', () => {
 			[authHeaderName]: 'Bearer ',
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				authHeaderName,
 				tokenGenerationHandler: jest.fn(),
@@ -126,7 +126,7 @@ describe('> Auth Header Verification Middleware.', () => {
 			[authHeaderName]: `Bearer ${token}`,
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				authHeaderName,
 				tokenGenerationHandler: jest.fn(),
@@ -154,7 +154,7 @@ describe('> Auth Header Verification Middleware.', () => {
 			[refreshTokenHeaderName]: refreshToken,
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				authHeaderName,
 				refreshTokenHeaderName,
@@ -185,7 +185,7 @@ describe('> Auth Header Verification Middleware.', () => {
 			[refreshTokenCookieName]: refreshToken,
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				authHeaderName,
 				refreshTokenHeaderName: undefined,
@@ -227,7 +227,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		const tokenStorage = new DefaultTokenStorage();
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
-		configure({
+		JwtManager({
 			tokenStorage,
 			middlewareConfigs: {
 				authHeaderName,
@@ -274,7 +274,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		const tokenStorage = new DefaultTokenStorage();
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
-		configure({
+		JwtManager({
 			tokenStorage,
 			middlewareConfigs: {
 				authHeaderName,
@@ -329,7 +329,7 @@ describe('> Auth Header Verification Middleware.', () => {
 		const tokenStorage = new DefaultTokenStorage();
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
-		configure({
+		JwtManager({
 			tokenStorage,
 			middlewareConfigs: {
 				authHeaderName,
@@ -359,7 +359,7 @@ describe('> Auth Header Verification Middleware.', () => {
 			[authHeaderName]: `Bearer ${token}`,
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				authHeaderName,
 				tokenGenerationHandler: jest.fn(),

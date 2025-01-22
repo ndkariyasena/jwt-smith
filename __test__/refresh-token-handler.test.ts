@@ -3,7 +3,7 @@ import DefaultTokenStorage from '../src/module/token-storage';
 import { TokenHandler } from '../src/module/refresh-token-handler';
 import { log } from '../src/lib/logger';
 import { sign } from '../src/lib/signing-token';
-import { configure } from '../src/index';
+import { JwtManager } from '../src/index';
 import * as utils from '../src/helper/utils';
 
 jest.mock('../src/module/token-storage');
@@ -24,7 +24,7 @@ const createAuthToken = async (options = {}, payload = {}): Promise<string> => {
 
 describe('> Refresh Token Handler', () => {
 	beforeAll(() => {
-		configure({
+		JwtManager({
 			publicKey: Secret,
 		});
 	});
@@ -37,7 +37,7 @@ describe('> Refresh Token Handler', () => {
 		jest.resetAllMocks();
 		jest.clearAllMocks();
 
-		configure({});
+		JwtManager({});
 	});
 
 	describe('>> Refresh token handler instance related tests.', () => {
