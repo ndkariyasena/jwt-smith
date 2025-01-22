@@ -15,6 +15,9 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 			authTokenExtractor,
 			tokenGenerationHandler,
 			cookieSettings = {},
+			authTokenPayloadVerifier,
+			refreshTokenPayloadVerifier,
+			refreshTokenHolderVerifier,
 		} = middlewareConfigs;
 		let authHeader = req.headers[authHeaderName ?? ''];
 
@@ -43,6 +46,9 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 			const refreshTokenHandler = new TokenHandler({
 				refreshTokenStorage: tokenStorage,
 				tokenGenerationHandler: tokenGenerationHandler,
+				authTokenPayloadVerifier,
+				refreshTokenPayloadVerifier,
+				refreshTokenHolderVerifier,
 			});
 
 			log('debug', `Auth token: ${tokenValue} | Refresh token: ${refreshToken}`);

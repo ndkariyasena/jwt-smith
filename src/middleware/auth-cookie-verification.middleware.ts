@@ -7,7 +7,14 @@ import { TokenHandler } from '../module/refresh-token-handler';
 
 const validateJwtCookieMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
-		const { appendToRequest = [], tokenGenerationHandler, cookieSettings = {} } = middlewareConfigs;
+		const {
+			appendToRequest = [],
+			tokenGenerationHandler,
+			cookieSettings = {},
+			authTokenPayloadVerifier,
+			refreshTokenPayloadVerifier,
+			refreshTokenHolderVerifier,
+		} = middlewareConfigs;
 
 		const accessToken =
 			req.cookies && cookieSettings.accessTokenCookieName
@@ -28,6 +35,9 @@ const validateJwtCookieMiddleware = async (req: Request, res: Response, next: Ne
 		const refreshTokenHandler = new TokenHandler({
 			refreshTokenStorage: tokenStorage,
 			tokenGenerationHandler: tokenGenerationHandler,
+			authTokenPayloadVerifier,
+			refreshTokenPayloadVerifier,
+			refreshTokenHolderVerifier,
 		});
 
 		const { decodedToken, nextRefreshToken, token } = await refreshTokenHandler.validateOrRefreshAuthToken(

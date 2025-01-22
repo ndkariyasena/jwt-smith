@@ -63,7 +63,7 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
 	middlewareConfigs: Joi.object<MiddlewareConfigsOptions>().optional(),
 });
 
-export const configure = (options: ConfigOptions) => {
+export const JwtManager = (options: ConfigOptions) => {
 	const { error, warning, value } = configOptionsSchema.validate(options);
 
 	if (error) {

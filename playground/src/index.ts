@@ -5,7 +5,7 @@ import bodyParser from 'body-parser';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
-import { configure } from 'jwt-smith';
+import { JwtManager } from 'jwt-smith';
 
 import { AppDataSource, TokenRepository } from './db';
 import userRouters from './routes/user';
@@ -24,7 +24,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-configure({
+JwtManager({
 	signOptions: {
 		algorithm: 'HS256',
 	},
@@ -34,9 +34,9 @@ configure({
 	middlewareConfigs: {
 		appendToRequest: ['user'],
 		tokenGenerationHandler: jwtTokenGenerator,
-	},
-	cookieSettings: {
-		refreshTokenCookieName: 'refreshToken',
+		cookieSettings: {
+			refreshTokenCookieName: 'refreshToken',
+		},
 	},
 });
 
