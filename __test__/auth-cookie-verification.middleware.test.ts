@@ -2,7 +2,7 @@ import { NextFunction, Response } from 'express';
 import validateJwtCookieMiddleware from '../src/middleware/auth-cookie-verification.middleware';
 import DefaultTokenStorage from '../src/module/token-storage';
 import { AuthedRequest } from '../src/lib/custom';
-import { configure } from '../src/lib/core';
+import { JwtManager } from '../src/lib/core';
 import { sign } from '../src/lib/signing-token';
 
 jest.mock('../src/lib/logger');
@@ -24,6 +24,9 @@ describe('> Auth Cookie Verification Middleware.', () => {
 	let mockRequest: Partial<AuthedRequest>;
 	let mockResponse: Partial<Response>;
 	let mockNext: jest.Mock<NextFunction>;
+	let authTokenPayloadVerifier: jest.Mock;
+	let refreshTokenPayloadVerifier: jest.Mock;
+	let refreshTokenHolderVerifier: jest.Mock;
 
 	beforeEach(() => {
 		mockRequest = {};
@@ -36,15 +39,25 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		};
 		mockNext = jest.fn();
 
-		configure({
+		authTokenPayloadVerifier = jest.fn();
+		refreshTokenPayloadVerifier = jest.fn();
+		refreshTokenHolderVerifier = jest.fn();
+
+		JwtManager({
 			publicKey: Secret,
+			middlewareConfigs: {
+				tokenGenerationHandler: jest.fn(),
+				authTokenPayloadVerifier,
+				refreshTokenPayloadVerifier,
+				refreshTokenHolderVerifier,
+			},
 		});
 	});
 
 	afterEach(() => {
 		jest.restoreAllMocks();
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn(),
 				cookieSettings: {
@@ -76,12 +89,15 @@ describe('> Auth Cookie Verification Middleware.', () => {
 			[accessTokenCookieName]: token,
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn(),
 				cookieSettings: {
 					accessTokenCookieName,
 				},
+				authTokenPayloadVerifier,
+				refreshTokenPayloadVerifier,
+				refreshTokenHolderVerifier,
 			},
 		});
 
@@ -106,13 +122,16 @@ describe('> Auth Cookie Verification Middleware.', () => {
 			[refreshTokenCookieName]: refreshToken,
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn(),
 				cookieSettings: {
 					accessTokenCookieName,
 					refreshTokenCookieName,
 				},
+				authTokenPayloadVerifier,
+				refreshTokenPayloadVerifier,
+				refreshTokenHolderVerifier,
 			},
 		});
 
@@ -148,7 +167,7 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		const tokenStorage = new DefaultTokenStorage();
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
-		configure({
+		JwtManager({
 			tokenStorage,
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
@@ -157,6 +176,9 @@ describe('> Auth Cookie Verification Middleware.', () => {
 					refreshTokenCookieName,
 					refreshCookieOptions,
 				},
+				authTokenPayloadVerifier,
+				refreshTokenPayloadVerifier,
+				refreshTokenHolderVerifier: jest.fn().mockResolvedValue(true),
 			},
 		});
 
@@ -203,7 +225,7 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		const tokenStorage = new DefaultTokenStorage();
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
-		configure({
+		JwtManager({
 			tokenStorage,
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
@@ -213,6 +235,9 @@ describe('> Auth Cookie Verification Middleware.', () => {
 					refreshTokenCookieName,
 					refreshCookieOptions,
 				},
+				authTokenPayloadVerifier,
+				refreshTokenPayloadVerifier,
+				refreshTokenHolderVerifier: jest.fn().mockResolvedValue(true),
 			},
 		});
 
@@ -232,12 +257,15 @@ describe('> Auth Cookie Verification Middleware.', () => {
 			[accessTokenCookieName]: token,
 		};
 
-		configure({
+		JwtManager({
 			middlewareConfigs: {
 				tokenGenerationHandler: jest.fn(),
 				cookieSettings: {
 					accessTokenCookieName,
 				},
+				authTokenPayloadVerifier,
+				refreshTokenPayloadVerifier,
+				refreshTokenHolderVerifier,
 			},
 		});
 

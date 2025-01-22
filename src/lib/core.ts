@@ -186,7 +186,7 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
  *
  * @example
  * ```typescript
- * import { configure } from 'jwt-smith';
+ * import { configure, JwtManager } from 'jwt-smith';
  *
  * configure({
  *  tokenStorage: new TokenStorage(),
@@ -216,7 +216,7 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
  *  },
  * });
  */
-export const configure = (options: ConfigOptions) => {
+export const JwtManager = (options: ConfigOptions) => {
 	const { error, warning, value } = configOptionsSchema.validate(options);
 
 	if (error) {
