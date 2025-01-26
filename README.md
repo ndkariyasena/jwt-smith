@@ -105,8 +105,8 @@ configure({
 	},
 });
 
-// Apply the validateJwtHeaderMiddleware globally or to specific routes
-app.use(validateJwtHeaderMiddleware);
+// Apply the validateJwtCookieMiddleware globally or to specific routes
+app.use(validateJwtCookieMiddleware);
 
 // Define a protected route
 app.get('/protected', (req, res) => {
@@ -136,7 +136,6 @@ app.listen(PORT, () => {
 
   <li>Validation & Refresh:</li>
     <ul>
-      <li>Validates the tokens using the TokenHandler.</li>
       <li>If the access token is invalid but a valid refresh token exists, a new access token is generated.</li>
     </ul>
 
@@ -158,15 +157,70 @@ app.listen(PORT, () => {
 
 ### `validateJwtHeaderMiddleware`
 
-Middleware to authenticate JWT tokens in headers.
+This middleware checks for the presence of a JWT token in the <span style="font-weight: 600; font-style: italic">Authorization header</span>.
+If the token is not found, it throws an error. If the token is found, it validates the token using the provided secret key.
+If the token is valid, it appends the decoded token payload to the request object. If the token is invalid or an error occurs during validation, it responds with a 401 Unauthorized status and an error message.
 
 ```javascript
-const { validateJwtHeaderMiddleware } = require('jwt-smith/src/middleware');
+import express from 'express';
+import { configure, validateJwtHeaderMiddleware } from 'jwt-smith';
 
-app.use(validateJwtHeaderMiddleware('your-secret-key'));
+const app = express();
+
+// Middleware for parsing JSON payloads
+app.use(express.json());
+
+configure({
+	signOptions: {
+		algorithm: 'HS256',
+	},
+	publicKey: process.env.ACCESS_TOKEN_SECRET,
+});
+
+// Apply the validateJwtHeaderMiddleware globally or to specific routes
+app.use(validateJwtHeaderMiddleware);
+
+// Define a protected route
+app.get('/protected', (req, res) => {
+	res.status(200).json({ message: 'Access granted! Your token is valid.' });
+});
+
+// Define a fallback route for unmatched paths
+app.use((req, res) => {
+	res.status(404).json({ error: 'Not found' });
+});
+
+// Start the server
+const PORT = 3000;
+app.listen(PORT, () => {
+	console.log(`Server is running on http://localhost:${PORT}`);
+});
 ```
 
-- `secret` (String): The secret key to verify the token.
+### How It Works
+
+<ol>
+  <li>Token Presence Check:</li>
+  <ul>
+    <li>The middleware checks the "Authorization" header for a JWT token.</li>
+    <li>If the token is not found, it throws an error.</li>
+  </ul>
+
+  <li>Validation:</li>
+  <ul>
+    <li>If the token is found, it validates the token using the provided secret key.</li>
+  </ul>
+
+  <li>Request Augmentation:</li>
+  <ul>
+    <li>On successful validation, the decoded payload is attached to the req object (e.g., req.user).</li>
+  </ul>
+
+  <li>Error Handling:</li>
+  <ul>
+    <li>If validation fails or an error occurs, it responds with a 401 Unauthorized status and an error message.</li>
+  </ul>
+</ol>
 
 ### `roleBasedAuthenticationMiddleware`
 

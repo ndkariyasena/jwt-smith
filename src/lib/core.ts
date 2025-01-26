@@ -186,9 +186,9 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
  *
  * @example
  * ```typescript
- * import { configure, JwtManager } from 'jwt-smith';
+ * import { JwtManager } from 'jwt-smith';
  *
- * configure({
+ * JwtManager({
  *  tokenStorage: new TokenStorage(),
  *  publicKey: 'public key',
  *  refreshTokenKey: 'refresh token key',
