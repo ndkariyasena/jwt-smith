@@ -227,12 +227,34 @@ app.listen(PORT, () => {
 Middleware to authorize users based on roles.
 
 ```javascript
-const { roleBasedAuthenticationMiddleware } = require('jwt-smith/src/middleware');
+const { roleBasedAuthenticationMiddleware } = require('jwt-smith');
 
-app.use(roleBasedAuthenticationMiddleware(['admin', 'user']));
+// Apply the middleware to specific routes
+app.use('/admin', roleBasedAuthenticationMiddleware('admin:update'));
+app.use('/user', roleBasedAuthenticationMiddleware('user:read'));
 ```
 
-- `roles` (Array): The roles allowed to access the route.
+- `roles:action` (String): The roles allowed to access the route.
+
+### How It Works
+
+<ol>
+  <li>Role Check:</li>
+  <ul>
+    <li>The middleware checks the decoded token payload for the user's role.</li>
+    <li>If the user's role is not in the allowed roles, it throws an error.</li>
+  </ul>
+
+  <li>Authorization:</li>
+  <ul>
+    <li>If the user's role is allowed, the request proceeds to the next middleware or route handler.</li>
+  </ul>
+
+  <li>Error Handling:</li>
+  <ul>
+    <li>If the user's role is not allowed or an error occurs, it responds with a 403 Forbidden status and an error message.</li>
+  </ul>
+</ol>
 
 ## License
 
