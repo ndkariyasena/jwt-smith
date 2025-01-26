@@ -19,6 +19,11 @@ import {
 } from '../helper/utils';
 
 /* TODO: Next step is to implement the session handling. */
+
+/**
+ * The `TokenHandler` class is responsible for handling authentication and refresh tokens.
+ * It provides methods to validate authentication tokens, rotate refresh tokens, and manage token storage.
+ */
 export class TokenHandler {
 	private refreshTokenStorage: TokenStorage;
 	private tokenGenerationHandler: TokenGenerationHandler;

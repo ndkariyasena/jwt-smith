@@ -6,6 +6,20 @@ import { log } from '../lib/logger';
 import { TokenHandler } from '../module/refresh-token-handler';
 import { appendTokenPayloadToRequest } from '../helper/utils';
 
+/**
+ * Middleware to validate JWT from the request header.
+ *
+ * This middleware extracts the JWT from the specified header, validates it, and optionally refreshes it if needed.
+ * It also appends the decoded token payload to the request object for further use in the application.
+ *
+ * @param req - The authenticated request object.
+ * @param res - The response object.
+ * @param next - The next middleware function in the stack.
+ *
+ * @throws Will throw an error if the auth header is not found, the token is invalid, or if the token extraction method is not provided.
+ *
+ * @returns A promise that resolves to void.
+ */
 const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, next: NextFunction): Promise<void> => {
 	try {
 		const {

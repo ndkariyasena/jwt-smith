@@ -5,6 +5,25 @@ import { log } from '../lib/logger';
 import { appendTokenPayloadToRequest } from '../helper/utils';
 import { TokenHandler } from '../module/refresh-token-handler';
 
+/**
+ * Middleware to validate JWT tokens stored in cookies.
+ *
+ * This middleware checks for the presence of access and refresh tokens in the request cookies.
+ * If neither token is found, it throws an error. If tokens are found, it validates or refreshes
+ * the tokens using the provided token generation handler and token storage.
+ *
+ * If the tokens are valid, it appends the decoded token payload to the request object and sets
+ * new tokens in the cookies if necessary. If the tokens are invalid or an error occurs during
+ * validation, it responds with a 401 Unauthorized status and an error message.
+ *
+ * @param req - The HTTP request object.
+ * @param res - The HTTP response object.
+ * @param next - The next middleware function in the stack.
+ * @returns A promise that resolves to void.
+ *
+ * @throws Will throw an error if neither access token nor refresh token is found in the cookies.
+ * @throws Will throw an error if the decoded token payload is undefined.
+ */
 const validateJwtCookieMiddleware = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
 		const {

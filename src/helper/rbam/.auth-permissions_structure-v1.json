@@ -1,0 +1,110 @@
+{
+	"versioned": true,
+	"activeVersions": ["v1"],
+	"common": {
+		"roles": [
+			{
+				"name": "Admin",
+				"permissions": ["*:*"]
+			},
+			{
+				"name": "Editor",
+				"permissions": ["read:post", "write:post"]
+			},
+			{
+				"name": "Viewer",
+				"permissions": ["read:post"]
+			}
+		]
+	},
+	"groups": {
+		"posts": {
+			"basePath": "/posts",
+			"permissions": [
+				{
+					"roles": ["Admin", "Editor"],
+					"actions": ["read:post", "write:post"]
+				},
+				{
+					"roles": ["Viewer"],
+					"actions": ["read:post"]
+				}
+			],
+			"endpoints": [
+				{
+					"path": "/:id",
+					"methods": ["GET", "DELETE"],
+					"permissions": [
+						{
+							"roles": ["Admin"],
+							"actions": ["delete:post"]
+						}
+					]
+				}
+			]
+		},
+		"users": {
+			"basePath": "/v1/users",
+			"permissions": [
+				{
+					"roles": ["Admin"],
+					"actions": ["*:*"]
+				}
+			],
+			"endpoints": [
+				{
+					"path": "/profile",
+					"methods": ["GET"],
+					"permissions": [
+						{
+							"roles": ["Admin", "Viewer"],
+							"actions": ["read:user"]
+						}
+					]
+				},
+				{
+					"path": "/:id",
+					"methods": ["PATCH", "DELETE"],
+					"permissions": [
+						{
+							"roles": ["Admin"],
+							"actions": ["update:user", "delete:user"]
+						}
+					]
+				}
+			]
+		}
+	},
+	"endpoints": [
+		{
+			"path": "/login",
+			"methods": ["POST"],
+			"permissions": [
+				{
+					"roles": ["Admin", "Viewer", "Editor"],
+					"actions": ["auth:login"]
+				}
+			]
+		},
+		{
+			"path": "/logout",
+			"methods": ["POST"],
+			"permissions": [
+				{
+					"roles": ["Admin", "Viewer", "Editor"],
+					"actions": ["auth:logout"]
+				}
+			]
+		},
+		{
+			"path": "/users",
+			"methods": ["GET"],
+			"permissions": [
+				{
+					"roles": ["Admin", "Viewer", "Editor"],
+					"actions": ["user:list"]
+				}
+			]
+		}
+	]
+}
