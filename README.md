@@ -33,12 +33,12 @@ npm install jwt-smith
 ## Usage
 
 ```javascript
-const { configure, sign, verify } = require('jwt-smith');
+const { JwtManager, sign, verify } = require('jwt-smith');
 // OR
-import { configure, sign, verify } from 'jwt-smith';
+import { JwtManager, sign, verify } from 'jwt-smith';
 
 // Example usage
-configure({
+JwtManager({
 	signOptions: {
 		algorithm: 'HS256',
 	},
@@ -52,6 +52,61 @@ console.log(decoded);
 ```
 
 ## API
+
+### `JwtManager({})`
+
+The `JwtManager` function initializes the JWT management system with various configurations. It accepts an options object with the following parameters:
+
+- `tokenStorage` (Object)[optional: Not recommended in production environment]: Custom storage for tokens (a class instance).
+- `logger` (Object)[optional]: Custom logger instance (like Pino, Winston)
+- `publicKey` (String)[required]: The public key for verifying JWTs.
+- `refreshTokenKey` (String)[optional]: The key for signing refresh tokens.
+- `signOptions` (Object)[optional]: Options for signing JWTs (All sign-options in jsonwebtoken library are acceptable).
+- `verifyOptions` (Object)[optional]: Options for verify JWTs (All verify-options in jsonwebtoken library are acceptable).
+- `middlewareConfigs` (Object): Configuration for middleware.
+  - `authHeaderName` (String) [optional]: Name of the HTTP header in the request which caries the auth token.
+  - `refreshTokenHeaderName` (String) [optional]: Name of the HTTP header in the request which caries the refresh token.
+  - `appendToRequest` (Array['user','role','language','tokenPayload'] | boolean)[optional]: List of properties to append to the request object.
+  - `cookieSettings` (Object): Settings for cookies.
+    - `accessTokenCookieName` (String): Name of the access token cookie.
+    - `accessCookieOptions` (Object): Options for the auth token cookie generation (Express cookie options).
+    - `refreshTokenCookieName` (String): Name of the refresh token cookie.
+    - `refreshCookieOptions` (Object): Options for the refresh token generation (Express cookie options).
+  - `tokenGenerationHandler` (Function)[required]: Custom handler for token and refresh-token generation.
+  - `authTokenExtractor` (Function)[optional]: Custom handler for extract the auth token from the header.
+  - `authTokenPayloadVerifier` (Function)[optional]: Custom handler for verify auth-token payload.
+  - `refreshTokenPayloadVerifier` (Function)[optional]: Custom handler for verify refresh-token payload.
+  - `refreshTokenHolderVerifier` (Function)[optional]: Custom handler for verify the refresh-token owner/holder.
+  - `extractApiVersion` (Function)[optional]: Custom handler for extract the API version from the request.
+
+#### Example
+
+```javascript
+const { JwtManager } = require('jwt-smith');
+// OR
+import { JwtManager } from 'jwt-smith';
+
+JwtManager({
+	signOptions: {
+		algorithm: 'HS256',
+	},
+	publicKey: process.env.ACCESS_TOKEN_SECRET,
+	refreshTokenKey: process.env.REFRESH_TOKEN_SECRET,
+	tokenStorage: new CustomTokenStorage(),
+	middlewareConfigs: {
+		tokenGenerationHandler: customTokenGeneration,
+		appendToRequest: ['user', 'role'],
+		cookieSettings: {
+			accessTokenCookieName: 'app-auth-token',
+			refreshTokenCookieName: 'app-auth-refresh-token',
+			refreshCookieOptions: {
+				httpOnly: true,
+				sameSite: false,
+			},
+		},
+	},
+});
+```
 
 ### `sign({payload, secret, options})`
 
@@ -81,7 +136,7 @@ If the tokens are valid, it appends the decoded token payload to the request obj
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import { AuthTokenStorage, authTokenGeneration } from 'Your_Custom_Token_Handling_Method';
-import { configure, validateJwtHeaderMiddleware } from 'jwt-smith';
+import { JwtManager, validateJwtHeaderMiddleware } from 'jwt-smith';
 
 const app = express();
 
@@ -89,7 +144,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-configure({
+JwtManager({
 	tokenStorage: new AuthTokenStorage(),
 	middlewareConfigs: {
 		tokenGenerationHandler: authTokenGeneration,
@@ -163,14 +218,14 @@ If the token is valid, it appends the decoded token payload to the request objec
 
 ```javascript
 import express from 'express';
-import { configure, validateJwtHeaderMiddleware } from 'jwt-smith';
+import { JwtManager, validateJwtHeaderMiddleware } from 'jwt-smith';
 
 const app = express();
 
 // Middleware for parsing JSON payloads
 app.use(express.json());
 
-configure({
+JwtManager({
 	signOptions: {
 		algorithm: 'HS256',
 	},
