@@ -74,7 +74,7 @@ const getPermissionConfigs = async () => {
  *
  * @example
  * // Usage in an Express route
- * app.get('/some-endpoint', roleBasedAuthenticationMiddleware('admin:read'), (req, res) => {
+ * app.get('articles/some-endpoint', roleBasedAuthenticationMiddleware('articles:list'), (req, res) => {
  *   res.send('You have access to this endpoint');
  * });
  */
