@@ -30,8 +30,8 @@ JwtManager({
 	},
 	publicKey: process.env.ACCESS_TOKEN_SECRET,
 	refreshTokenKey: process.env.REFRESH_TOKEN_SECRET,
-	tokenStorage: new TokenRepository(),
 	middlewareConfigs: {
+		tokenStorage: new TokenRepository(),
 		appendToRequest: ['user'],
 		tokenGenerationHandler: jwtTokenGenerator,
 		cookieSettings: {

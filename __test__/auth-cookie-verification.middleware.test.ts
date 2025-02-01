@@ -168,8 +168,8 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
 		JwtManager({
-			tokenStorage,
 			middlewareConfigs: {
+				tokenStorage,
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
 				cookieSettings: {
 					accessTokenCookieName,
@@ -226,8 +226,8 @@ describe('> Auth Cookie Verification Middleware.', () => {
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
 		JwtManager({
-			tokenStorage,
 			middlewareConfigs: {
+				tokenStorage,
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
 				appendToRequest: ['user', 'role'],
 				cookieSettings: {
