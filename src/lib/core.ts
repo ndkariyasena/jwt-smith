@@ -158,11 +158,11 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
  *  publicKey: 'public key',
  *  refreshTokenKey: 'refresh token key',
  *  signOptions: {
- *   algorithm: 'RS256',
- *   expiresIn: '1h',
+ *    algorithm: 'RS256',
+ *    expiresIn: '1h',
  *  },
  *  verifyOptions: {
- *   algorithms: ['RS256'],
+ *    algorithms: ['RS256'],
  *  },
  *  middlewareConfigs: {
  *    tokenStorage: new TokenStorage(),
