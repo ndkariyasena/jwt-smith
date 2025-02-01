@@ -1,6 +1,6 @@
 import { NextFunction, Response } from 'express';
 
-import { middlewareConfigs, tokenStorage } from '../lib/core';
+import { middlewareConfigs } from '../lib/core';
 import { AuthedRequest } from '../lib/custom';
 import { log } from '../lib/logger';
 import { TokenHandler } from '../module/refresh-token-handler';
@@ -32,6 +32,7 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 			authTokenPayloadVerifier,
 			refreshTokenPayloadVerifier,
 			refreshTokenHolderVerifier,
+			tokenStorage,
 		} = middlewareConfigs;
 		let authHeader = req.headers[authHeaderName ?? ''];
 

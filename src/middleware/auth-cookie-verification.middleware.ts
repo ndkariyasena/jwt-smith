@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 
-import { middlewareConfigs, tokenStorage } from '../lib/core';
+import { middlewareConfigs } from '../lib/core';
 import { log } from '../lib/logger';
 import { appendTokenPayloadToRequest } from '../helper/utils';
 import { TokenHandler } from '../module/refresh-token-handler';
@@ -33,6 +33,7 @@ const validateJwtCookieMiddleware = async (req: Request, res: Response, next: Ne
 			authTokenPayloadVerifier,
 			refreshTokenPayloadVerifier,
 			refreshTokenHolderVerifier,
+			tokenStorage,
 		} = middlewareConfigs;
 
 		const accessToken =

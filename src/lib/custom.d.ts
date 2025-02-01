@@ -118,6 +118,25 @@ export interface RequestAppends {
 export type AuthedRequest = RequestAppends & Request;
 
 export interface MiddlewareConfigsOptions {
+	/**
+	 * Token storage instance.
+	 * If not provided, the library will use the default token storage.
+	 * The user can provide their own token storage instance.
+	 * The library will use the provided token storage instance.
+	 * The token storage instance should implement the TokenStorage interface.
+	 * The token storage instance should have the following methods:
+	 * - getToken
+	 * - getRefreshToken
+	 * - getRefreshTokenHolder
+	 * - saveOrUpdateToken
+	 * - deleteToken
+	 * - blackListRefreshToken
+	 * - checkBlackListedRefreshToken
+	 *
+	 * @type {TokenStorage}
+	 * @memberof ConfigOptions
+	 */
+	tokenStorage?: TokenStorage;
 	authHeaderName?: string;
 	refreshTokenHeaderName?: string;
 	appendToRequest?: AppendToRequest;

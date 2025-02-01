@@ -1,13 +1,5 @@
 import Joi from 'joi';
-import {
-	TokenStorage,
-	Logger,
-	PublicKey,
-	Secret,
-	SignTokenOptions,
-	VerifyTokenOptions,
-	MiddlewareConfigsOptions,
-} from './custom.d';
+import { Logger, PublicKey, Secret, SignTokenOptions, VerifyTokenOptions, MiddlewareConfigsOptions } from './custom.d';
 import { log, logFormat, setLogger } from './logger';
 import { setDefaultSignOptions } from './signing-token';
 import { setDefaultVerifyOptions } from './verify-token';
@@ -18,13 +10,6 @@ import {
 	defaultRefreshTokenPayloadVerifier,
 	defaultRefreshTokenHolderVerifier,
 } from '../helper/utils';
-
-/**
- * Token storage instance.
- *
- * @type TokenStorage
- */
-export let tokenStorage: TokenStorage;
 
 /**
  * Public key for token verification.
@@ -49,6 +34,7 @@ export let refreshTokenKey: Secret | PublicKey;
  * @type MiddlewareConfigsOptions
  */
 export let middlewareConfigs: MiddlewareConfigsOptions = {
+	tokenStorage: undefined,
 	authHeaderName: 'authorization',
 	appendToRequest: [],
 	cookieSettings: { accessTokenCookieName: 'accessToken', accessCookieOptions: {}, refreshTokenCookieName: undefined },
@@ -66,25 +52,6 @@ export let middlewareConfigs: MiddlewareConfigsOptions = {
  * @interface ConfigOptions
  */
 interface ConfigOptions {
-	/**
-	 * Token storage instance.
-	 * If not provided, the library will use the default token storage.
-	 * The user can provide their own token storage instance.
-	 * The library will use the provided token storage instance.
-	 * The token storage instance should implement the TokenStorage interface.
-	 * The token storage instance should have the following methods:
-	 * - getToken
-	 * - getRefreshToken
-	 * - getRefreshTokenHolder
-	 * - saveOrUpdateToken
-	 * - deleteToken
-	 * - blackListRefreshToken
-	 * - checkBlackListedRefreshToken
-	 *
-	 * @type {TokenStorage}
-	 * @memberof ConfigOptions
-	 */
-	tokenStorage?: TokenStorage;
 	/**
 	 * Logger instance.
 	 * If not provided, the library will use the default logger.
@@ -164,7 +131,6 @@ const secretSchema = Joi.alternatives().try(
 );
 
 const configOptionsSchema = Joi.object<ConfigOptions>({
-	tokenStorage: Joi.object<TokenStorage>().optional(),
 	logger: Joi.object<Logger>().optional(),
 	publicKey: secretSchema.optional(),
 	refreshTokenKey: secretSchema.optional(),
@@ -189,7 +155,6 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
  * import { JwtManager } from 'jwt-smith';
  *
  * JwtManager({
- *  tokenStorage: new TokenStorage(),
  *  publicKey: 'public key',
  *  refreshTokenKey: 'refresh token key',
  *  signOptions: {
@@ -200,18 +165,19 @@ const configOptionsSchema = Joi.object<ConfigOptions>({
  *   algorithms: ['RS256'],
  *  },
  *  middlewareConfigs: {
- *  authHeaderName: 'authorization',
- *  appendToRequest: ['user'],
- *  cookieSettings: {
- *   accessTokenCookieName: 'access_token',
- *   accessCookieOptions: {
- *    httpOnly: true,
- *    secure: true,
- *   },
- *   refreshTokenCookieName: 'refresh_token',
- *   refreshCookieOptions: {
- *    httpOnly: true,
- *    secure: true,
+ *    tokenStorage: new TokenStorage(),
+ *    authHeaderName: 'authorization',
+ *    appendToRequest: ['user'],
+ *    cookieSettings: {
+ *      accessTokenCookieName: 'access_token',
+ *      accessCookieOptions: {
+ *        httpOnly: true,
+ *        secure: true,
+ *      },
+ *      refreshTokenCookieName: 'refresh_token',
+ *      refreshCookieOptions: {
+ *        httpOnly: true,
+ *      secure: true,
  *    },
  *  },
  * });
@@ -226,7 +192,6 @@ export const JwtManager = (options: ConfigOptions) => {
 	}
 
 	if (value.logger) setLogger(value.logger);
-	if (value.tokenStorage) tokenStorage = value.tokenStorage;
 
 	if (value.publicKey) publicKey = value.publicKey;
 	if (value.refreshTokenKey) refreshTokenKey = value.refreshTokenKey;

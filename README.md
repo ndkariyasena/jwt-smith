@@ -57,13 +57,13 @@ console.log(decoded);
 
 The `JwtManager` function initializes the JWT management system with various configurations. It accepts an options object with the following parameters:
 
-- `tokenStorage` (Object)[optional: Not recommended in production environment]: Custom storage for tokens (a class instance).
 - `logger` (Object)[optional]: Custom logger instance (like Pino, Winston)
 - `publicKey` (String)[required]: The public key for verifying JWTs.
 - `refreshTokenKey` (String)[optional]: The key for signing refresh tokens.
 - `signOptions` (Object)[optional]: Options for signing JWTs (All sign-options in jsonwebtoken library are acceptable).
 - `verifyOptions` (Object)[optional]: Options for verify JWTs (All verify-options in jsonwebtoken library are acceptable).
 - `middlewareConfigs` (Object): Configuration for middleware.
+  - `tokenStorage` (Object)[optional: Not recommended in production environment]: Custom storage for tokens (a class instance).
   - `authHeaderName` (String) [optional]: Name of the HTTP header in the request which caries the auth token.
   - `refreshTokenHeaderName` (String) [optional]: Name of the HTTP header in the request which caries the refresh token.
   - `appendToRequest` (Array['user','role','language','tokenPayload'] | boolean)[optional]: List of properties to append to the request object.
@@ -92,8 +92,8 @@ JwtManager({
 	},
 	publicKey: process.env.ACCESS_TOKEN_SECRET,
 	refreshTokenKey: process.env.REFRESH_TOKEN_SECRET,
-	tokenStorage: new CustomTokenStorage(),
 	middlewareConfigs: {
+		tokenStorage: new CustomTokenStorage(),
 		tokenGenerationHandler: customTokenGeneration,
 		appendToRequest: ['user', 'role'],
 		cookieSettings: {
@@ -145,8 +145,8 @@ app.use(express.json());
 app.use(cookieParser());
 
 JwtManager({
-	tokenStorage: new AuthTokenStorage(),
 	middlewareConfigs: {
+		tokenStorage: new AuthTokenStorage(),
 		tokenGenerationHandler: authTokenGeneration,
 		appendToRequest: ['user', 'role'],
 		cookieSettings: {

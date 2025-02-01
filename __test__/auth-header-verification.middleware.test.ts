@@ -51,8 +51,8 @@ describe('> Auth Header Verification Middleware.', () => {
 		jest.restoreAllMocks();
 
 		JwtManager({
-			tokenStorage: undefined,
 			middlewareConfigs: {
+				tokenStorage: undefined,
 				authHeaderName: undefined,
 				refreshTokenHeaderName: undefined,
 				tokenGenerationHandler: jest.fn(),
@@ -228,8 +228,8 @@ describe('> Auth Header Verification Middleware.', () => {
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
 		JwtManager({
-			tokenStorage,
 			middlewareConfigs: {
+				tokenStorage,
 				authHeaderName,
 				refreshTokenHeaderName,
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
@@ -275,8 +275,8 @@ describe('> Auth Header Verification Middleware.', () => {
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
 		JwtManager({
-			tokenStorage,
 			middlewareConfigs: {
+				tokenStorage,
 				authHeaderName,
 				refreshTokenHeaderName: undefined,
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
@@ -330,8 +330,8 @@ describe('> Auth Header Verification Middleware.', () => {
 		tokenStorage.saveOrUpdateToken(userId, refreshToken);
 
 		JwtManager({
-			tokenStorage,
 			middlewareConfigs: {
+				tokenStorage,
 				authHeaderName,
 				refreshTokenHeaderName: undefined,
 				tokenGenerationHandler: jest.fn().mockResolvedValue(tokenGenerationOutput),
