@@ -80,8 +80,7 @@ jobs:
       - name: Auto-approve and merge the version bump PR
         run: |
           PR_URL=$(cat pr_url.txt)
-          gh pr review "$PR_URL" --approve --repo ${{ github.repository }} --admin
-          gh pr merge --auto --squash --repo ${{ github.repository }} --head "$BRANCH_NAME" --admin
+          gh pr review "$PR_URL" --approve --repo ${{ github.repository }}
           gh pr merge "$PR_URL" --auto --admin --squash
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
