@@ -5,8 +5,10 @@
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",
+	"private": false,
 	"scripts": {
 		"build": "npm run lint:package && tsup src/index.ts --format cjs,esm --dts",
+		"postbuild": "cp README.md dist/",
 		"format": "prettier --ignore-unknown --write .",
 		"format:check": "prettier --check .",
 		"lint:all": "eslint . --ignore-pattern 'dist/*' --ignore-pattern '*/**/**.mjs'",
