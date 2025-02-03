@@ -72,14 +72,14 @@ jobs:
                        --base main \
                        --head "$BRANCH_NAME"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Auto-approve and merge version bump PR
         run: |
           gh pr review --approve --repo ${{ github.repository }} --head "$BRANCH_NAME" --admin
           gh pr merge --auto --squash --repo ${{ github.repository }} --head "$BRANCH_NAME" --admin
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
   publish:
     name: Publish to npm
