@@ -49,7 +49,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Create version bump PR (using Changesets)
+      - name: Create version bump branch (using Changesets)
         run: |
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
@@ -65,19 +65,24 @@ jobs:
           git add .
           git commit -m "Version bump via Changesets"
           git push origin "$BRANCH_NAME"
-
-          # Create a pull request
-          gh pr create --title "Version bump via Changesets" \
-                       --body "Automated version bump PR" \
-                       --base main \
-                       --head "$BRANCH_NAME"
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
-      - name: Auto-approve and merge version bump PR
+      - name: Create Pull Request
+        id: create_pr # Assign an ID to the step
         run: |
-          gh pr review --approve --repo ${{ github.repository }} --head "$BRANCH_NAME" --admin
+          PR_URL=$(gh pr create --title "Version bump via Changesets" \
+            --body "Automated version bump PR" \
+            --base main \
+            --head "$BRANCH_NAME" | tee pr_url.txt) # Save URL to a file and output
+          echo "::set-output name=pr_url::$PR_URL" # Set the output variable
+
+      - name: Auto-approve and merge the version bump PR
+        run: |
+          PR_URL=$(cat pr_url.txt)
+          gh pr review "$PR_URL" --approve --repo ${{ github.repository }} --admin
           gh pr merge --auto --squash --repo ${{ github.repository }} --head "$BRANCH_NAME" --admin
+          gh pr merge "$PR_URL" --auto --admin --squash
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
