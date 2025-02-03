@@ -64,9 +64,13 @@ jobs:
           # Commit and push the changes
           git add .
           git commit -m "Version bump via Changesets"
-          git push -u origin "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
 
-      - name: Auto-approve & merge PR
+          # Create a pull request
+          gh pr create --title "Version bump via Changesets" \
+                       --body "Automated version bump PR" \
+                       --base main \
+                       --head "$BRANCH_NAME"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
