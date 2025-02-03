@@ -22,14 +22,31 @@
 	},
 	"keywords": [
 		"jwt",
+		"authentication",
+		"authorization",
+		"token",
+		"refresh-token",
+		"jsonwebtoken",
+		"jwt-auth",
+		"jwt-middleware",
+		"token-management",
+		"jwt-verification",
+		"nodejs",
+		"typescript",
+		"express-middleware",
+		"security",
 		"auth",
-		"jwt refresh"
+		"access-control",
+		"rbac",
+		"jsonwebtoken-utils",
+		"secure-jwt"
 	],
 	"author": {
 		"name": "N D K Ariyasena",
-		"email": "ndkariyasena@gmail.com"
+		"email": "ndkariyasena@gmail.com",
+		"url": "https://jwt-smith.ndkariyasena.com"
 	},
-	"license": "ISC",
+	"license": "MIT",
 	"dependencies": {
 		"express": "^4.21.1",
 		"joi": "^17.13.3",
