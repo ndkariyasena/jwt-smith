@@ -50,21 +50,36 @@ jobs:
         run: npm ci
 
       - name: Create version bump PR (using Changesets)
-        id: create-pr
         run: |
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-          npx changeset version
-          git add .
-          git commit -m "Version bump via Changesets" || echo "No changes to commit"
-          git push origin main || echo "No changes to push"
+          # Create a temporary branch for the version bump
+          BRANCH_NAME="changeset-release-${{ github.run_id }}"
+          git checkout -b "$BRANCH_NAME"
 
-      - name: Auto-approve & merge PR
+          # Run Changeset version bump
+          npx changeset version
+
+          # Commit and push the changes
+          git add .
+          git commit -m "Version bump via Changesets"
+          git push -u origin "$BRANCH_NAME"
+
+          # Create a pull request
+          gh pr create --title "Version bump via Changesets" \
+                        --body "Automated version bump PR" \
+                        --base main \
+                        --head "$BRANCH_NAME"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-approve and merge version bump PR
         run: |
-          gh pr merge ${{ steps.create-pr.outputs.pull-request-number }} --squash --admin
+          gh pr review --approve --repo ${{ github.repository }} --head "$BRANCH_NAME" --admin
+          gh pr merge --auto --squash --repo ${{ github.repository }} --head "$BRANCH_NAME" --admin
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
     name: Publish to npm
