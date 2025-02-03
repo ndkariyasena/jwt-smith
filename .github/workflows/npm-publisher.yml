@@ -74,8 +74,9 @@ jobs:
           PR_URL=$(gh pr create --title "Version bump via Changesets" \
             --body "Automated version bump PR" \
             --base main \
-            --head "$BRANCH_NAME" | tee pr_url.txt) # Save URL to a file and output
-          echo "::set-output name=pr_url::$PR_URL" # Set the output variable
+            --head "$BRANCH_NAME" | tee pr_url.txt)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
       - name: Auto-approve and merge the version bump PR
         run: |
