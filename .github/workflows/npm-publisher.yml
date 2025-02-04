@@ -56,6 +56,13 @@ jobs:
         with:
           node-version: 20
 
+      - name: Check for changesets
+        run: |
+          if [ ! -d ".changeset" ] || [ -z "$(find .changeset -type f -name '*.md' ! -name 'README.md')" ]; then
+            echo "No valid changesets found. Cannot publish."
+            exit 1
+          fi
+
       - name: Install dependencies
         run: npm ci
 
