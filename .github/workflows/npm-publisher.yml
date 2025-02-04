@@ -126,7 +126,7 @@ jobs:
         run: npm ci
 
       - name: Build project
-        run: npm run build
+        run: npm run build && cp CHANGELOG.md dist/
 
       - name: Publish package to npm
         env:
@@ -139,12 +139,10 @@ jobs:
 
           if [[ "$PACKAGE_NAME" == @* ]]; then
             echo "Scoped package detected. Publishing with --access=restricted..."
-            npm publish --access=restricted --tag "$PACKAGE_VERSION"
-            npm dist-tag add "$PACKAGE_NAME@$PACKAGE_VERSION" --tag latest
+            npm publish --access=restricted
           else
             echo "Unscoped package detected. Publishing without --access=restricted..."
-            npm publish --tag "$PACKAGE_VERSION"
-            npm dist-tag add "$PACKAGE_NAME@$PACKAGE_VERSION" --tag latest
+            npm publish
           fi
 
   # notify-slack:
