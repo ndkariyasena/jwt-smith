@@ -115,7 +115,7 @@ jobs:
         run: npm ci
 
       - name: Build project
-        run: npm run build
+        run: npm run build && cp CHANGELOG.md dist/
 
       - name: Publish package to npm
         env:
