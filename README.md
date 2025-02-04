@@ -127,12 +127,6 @@ const jwtManager = new JwtManager({
 
 ---
 
-## 🐟 Changelog
-
-See [CHANGELOG.md](./CHANGELOG.md) for details on new releases and updates.
-
----
-
 ## 💬 Community & Support
 
 💡 **Documentation**: [Read the Docs](https://your-docs-site.com)  
