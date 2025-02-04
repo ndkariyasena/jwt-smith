@@ -1,6 +1,6 @@
 {
 	"name": "jwt-smith",
-	"version": "1.0.0",
+	"version": "0.0.0",
 	"description": "Enhanced JWT Authentication and Authorization Module",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
@@ -11,7 +11,7 @@
 	],
 	"scripts": {
 		"build": "npm run lint:package && tsup src/index.ts --format cjs,esm --dts",
-		"postbuild": "cp README.md dist/",
+		"postbuild": "cp README.md LICENSE.md dist/",
 		"format": "prettier --ignore-unknown --write .",
 		"format:check": "prettier --check .",
 		"lint:all": "eslint . --ignore-pattern 'dist/*' --ignore-pattern '*/**/**.mjs'",
