@@ -113,10 +113,10 @@ jobs:
 
           if [[ "$PACKAGE_NAME" == @* ]]; then
             echo "Scoped package detected. Publishing with --access=restricted..."
-            npm publish dist --access=restricted
+            npm publish --access=restricted
           else
             echo "Unscoped package detected. Publishing without --access=restricted..."
-            npm publish dist
+            npm publish
           fi
 
   # notify-slack:
