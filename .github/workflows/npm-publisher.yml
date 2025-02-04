@@ -108,7 +108,7 @@ jobs:
         run: npm ci
 
       - name: Build project
-        run: npm run build && cp CHANGELOG.md dist/
+        run: npm run build
 
       - name: Publish package to npm
         env:
@@ -116,6 +116,8 @@ jobs:
         run: |
           PACKAGE_NAME=$(jq -r .name package.json)
           PACKAGE_VERSION=$(jq -r .version package.json)
+
+          echo ">>> Publishing $PACKAGE_NAME@$PACKAGE_VERSION to npm..."
 
           if [[ "$PACKAGE_NAME" == @* ]]; then
             echo "Scoped package detected. Publishing with --access=restricted..."
