@@ -6,6 +6,9 @@
 	"module": "dist/index.mjs",
 	"types": "dist/index.d.ts",
 	"private": false,
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"build": "npm run lint:package && tsup src/index.ts --format cjs,esm --dts",
 		"postbuild": "cp README.md dist/",
