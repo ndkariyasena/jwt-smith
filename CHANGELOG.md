@@ -1,5 +1,13 @@
 # jwt-smith
 
+## 1.0.1
+
+### Patch Changes
+
+- 73e95d9: Changelog - Version 1.0.1
+
+  - Debug logs have been added in the middleware functions.
+
 ## 1.0.0
 
 ### Major Changes
