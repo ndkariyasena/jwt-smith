@@ -90,6 +90,8 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 		let requestVersion = undefined;
 		let versionValidationError: string | undefined = undefined;
 
+		log('debug', 'Role-based authentication middleware invoked.');
+
 		if (extractApiVersion) {
 			const version = await extractApiVersion(req);
 
@@ -98,6 +100,7 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 			}
 		}
 
+		log('debug', 'Role-based authentication middleware configurations extracted.');
 		log(
 			'debug',
 			`User role: ${userRole} | Required action: ${requiredAction} | Endpoint: ${endpointPath} | Method: ${method}`,
@@ -109,7 +112,11 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 		} else {
 			const permissionsConfig: PermissionsConfiguration = await getPermissionConfigs();
 
+			log('debug', 'Auth permissions configuration file loaded.');
+
 			const { error } = permissionsConfigSchema.validate(permissionsConfig);
+
+			log('debug', 'Auth permissions configuration file validated.');
 
 			if (error) {
 				log('error', "Auth Permissions config file's validation failed.", error);
@@ -132,11 +139,14 @@ const roleBasedAuthenticationMiddleware = (requiredAction: string) => {
 				}
 			}
 
+			log('debug', 'Permission configurations validated.');
+
 			if (versionValidationError) {
 				log('error', versionValidationError);
 
 				res.status(400).json({ error: versionValidationError });
 			} else {
+				log('debug', 'Permission configurations validating...');
 				/* Match standalone endpoints. */
 				if (permissionsConfig.endpoints) {
 					const standaloneEndpoint = permissionsConfig.endpoints.find(

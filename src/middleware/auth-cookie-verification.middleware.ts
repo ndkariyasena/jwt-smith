@@ -50,6 +50,7 @@ const validateJwtCookieMiddleware = async (req: Request, res: Response, next: Ne
 			throw new Error('Auth cookie not found!');
 		}
 
+		log('debug', 'Auth cookie and middleware configurations extracted.');
 		log('debug', `Access token: ${accessToken} | Refresh token: ${refreshToken}`);
 
 		const refreshTokenHandler = new TokenHandler({
@@ -60,16 +61,22 @@ const validateJwtCookieMiddleware = async (req: Request, res: Response, next: Ne
 			refreshTokenHolderVerifier,
 		});
 
+		log('debug', 'Token handler created.');
+
 		const { decodedToken, nextRefreshToken, token } = await refreshTokenHandler.validateOrRefreshAuthToken(
 			accessToken,
 			refreshToken,
 		);
+
+		log('debug', 'Token handler validated or refreshed the auth token.');
 
 		if (!decodedToken) {
 			throw new Error('Auth cookie payload is undefined!');
 		}
 
 		appendTokenPayloadToRequest(req, appendToRequest, decodedToken);
+
+		log('debug', 'Token payload appended to the request object.');
 
 		if (cookieSettings.accessTokenCookieName) {
 			log('debug', 'New access token set in the cookie.');
@@ -80,6 +87,8 @@ const validateJwtCookieMiddleware = async (req: Request, res: Response, next: Ne
 			log('debug', 'New refresh token set in the cookie.');
 			res.cookie(cookieSettings.refreshTokenCookieName, nextRefreshToken, cookieSettings.refreshCookieOptions || {});
 		}
+
+		log('debug', 'Token handler completed successfully.');
 
 		next();
 	} catch (error) {

@@ -90,6 +90,8 @@ export class TokenHandler {
 		try {
 			const isBlackListed = await this.refreshTokenStorage.checkBlackListedRefreshToken(refreshToken);
 
+			log('debug', 'Checking if the refresh token is blacklisted.');
+
 			if (isBlackListed) {
 				log('error', 'Blacklisted refresh token received!', { refreshToken });
 
@@ -101,19 +103,27 @@ export class TokenHandler {
 				secret: refreshTokenKey || publicKey,
 			});
 
+			log('debug', 'Decoded the refresh token payload.');
+
 			if (!decodedTokenPayload) {
 				throw new Error('Refresh token payload is undefined!');
 			}
 
 			await this.refreshTokenPayloadVerifier(decodedTokenPayload);
 
+			log('debug', 'Refresh token payload verification complete.');
+
 			const tokenHolder = await this.refreshTokenStorage.getRefreshTokenHolder(refreshToken);
+
+			log('debug', 'Retrieved the refresh token holder.');
 
 			if (!tokenHolder) {
 				throw new Error('Could not find a matching token holder for the refresh token.');
 			}
 
 			const isHolderVerified = await this.refreshTokenHolderVerifier(tokenHolder, decodedTokenPayload);
+
+			log('debug', 'Refresh token holder verification complete.');
 
 			if (!isHolderVerified) {
 				await this.refreshTokenStorage.blackListRefreshToken(refreshToken);
@@ -123,6 +133,8 @@ export class TokenHandler {
 
 			const response = await this.tokenGenerationHandler(decodedTokenPayload, tokenHolder);
 
+			log('debug', 'Generated new tokens.');
+
 			const userId =
 				tokenHolder.id ||
 				(typeof decodedTokenPayload !== 'string' && 'user' in decodedTokenPayload
@@ -130,6 +142,8 @@ export class TokenHandler {
 					: undefined);
 
 			await this.refreshTokenStorage.saveOrUpdateToken(userId, response.refreshToken, response.token);
+
+			log('debug', 'Saved the new tokens.');
 
 			return response;
 		} catch (error) {

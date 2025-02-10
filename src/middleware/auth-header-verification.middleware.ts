@@ -36,14 +36,22 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 		} = middlewareConfigs;
 		let authHeader = req.headers[authHeaderName ?? ''];
 
+		log('debug', 'Auth header and middleware configurations extracted.');
+
 		if (Array.isArray(authHeader)) authHeader = authHeader.join('__');
+
+		log('debug', `Auth header: ${authHeader}`);
 
 		if (!authHeader || !authHeader.startsWith('Bearer ')) {
 			throw new Error('Valid auth header not found');
 		}
 
 		if (authTokenExtractor) {
+			log('debug', 'Auth token extractor method found.');
+
 			const tokenValue = authTokenExtractor(authHeader);
+
+			log('debug', `Auth token value: ${tokenValue}`);
 
 			if (!tokenValue) {
 				throw new Error('Auth token not found');
@@ -58,6 +66,8 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 				refreshToken = req.headers[refreshTokenHeaderName];
 			}
 
+			log('debug', 'Refresh token extracted.');
+
 			const refreshTokenHandler = new TokenHandler({
 				refreshTokenStorage: tokenStorage,
 				tokenGenerationHandler: tokenGenerationHandler,
@@ -66,6 +76,7 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 				refreshTokenHolderVerifier,
 			});
 
+			log('debug', 'Token handler created.');
 			log('debug', `Auth token: ${tokenValue} | Refresh token: ${refreshToken}`);
 
 			const { decodedToken, nextRefreshToken, token } = await refreshTokenHandler.validateOrRefreshAuthToken(
@@ -73,11 +84,15 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 				refreshToken,
 			);
 
+			log('debug', 'Token handler validated or refreshed the auth token.');
+
 			if (!decodedToken) {
 				throw new Error('Auth cookie payload is undefined!');
 			}
 
 			appendTokenPayloadToRequest(req, appendToRequest, decodedToken);
+
+			log('debug', 'Token payload appended to the request object.');
 
 			res.setHeader(authHeaderName ?? 'authorization', token);
 
@@ -88,6 +103,8 @@ const validateJwtHeaderMiddleware = async (req: AuthedRequest, res: Response, ne
 				log('debug', 'New refresh token set in the header.');
 				res.setHeader(refreshTokenHeaderName, nextRefreshToken);
 			}
+
+			log('debug', 'Next middleware called.');
 
 			return next();
 		} else {
