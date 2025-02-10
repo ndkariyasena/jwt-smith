@@ -2,9 +2,26 @@
 
 **A powerful, customizable, and secure JWT authentication module for Node.js.**
 
-[![npm version](https://img.shields.io/npm/v/jwt-smith)](https://www.npmjs.com/package/jwt-smith)  
-[![License](https://img.shields.io/github/license/ndkariyasena/jwt-smith)](LICENSE)  
-[![Build Status](https://github.com/ndkariyasena/jwt-smith/actions/workflows/npm-publisher.yml/badge.svg)](https://github.com/ndkariyasena/jwt-smith/actions)
+<p align="center">
+  <a href="https://www.npmjs.com/package/jwt-smith">
+    <img src="https://img.shields.io/npm/v/jwt-smith" alt="npm version">
+  </a>
+  <a href="LICENSE">
+    <img src="https://img.shields.io/github/license/ndkariyasena/jwt-smith" alt="License">
+  </a>
+  <a href="https://github.com/ndkariyasena/jwt-smith/actions">
+    <img src="https://github.com/ndkariyasena/jwt-smith/actions/workflows/npm-publisher.yml/badge.svg" alt="Build Status">
+  </a>
+  <a href="https://github.com/ndkariyasena/jwt-smith/commits">
+    <img src="https://img.shields.io/github/last-commit/ndkariyasena/jwt-smith.svg?style=flat" alt="GitHub last commit">
+  </a>
+  <a href="https://github.com/ndkariyasena/jwt-smith/commits">
+    <img src="https://img.shields.io/github/commit-activity/y/ndkariyasena/jwt-smith.svg?style=flat" alt="GitHub commit activity">
+  </a>
+  <a href="https://www.npmjs.com/package/jwt-smith">
+    <img src="https://img.shields.io/npm/dm/jwt-smith.svg" alt="Downloads">
+  </a>
+</p>
 
 ---
 
@@ -28,7 +45,9 @@ npm install jwt-smith
 
 ## 🛠️ Usage
 
-#### 🌐 For a comprehensive guide and detailed information, please visit the official documentation website. [**JWT Smith Documentation**](https://jwt-smith.ndkariyasena.com)
+### ❗❗🌐 For a comprehensive guide and detailed information, please visit the official documentation website. [**JWT Smith Documentation**](https://jwt-smith.ndkariyasena.com)
+
+@Note ❗ Debug logs have been added in the middleware functions to make the development process easier. It is highly recommended to disable debug logs in the production environment.
 
 ### 1️⃣ **Initialize JWT Manager**
 
@@ -137,7 +156,7 @@ const jwtManager = new JwtManager({
 
 ## 🐜 License
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE.md) file for details.
 
 ---
 
