@@ -1,0 +1,44 @@
+version: 2
+
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    labels:
+      - 'npm'
+      - 'dependencies'
+    versioning-strategy: auto
+    groups:
+      types:
+        patterns:
+          - '@types/**'
+      typescript:
+        patterns:
+          - 'typescript'
+          - 'typescript-*/**'
+      express:
+        patterns:
+          - 'express'
+      joi:
+        patterns:
+          - 'joi'
+    # Uncomment and adjust the following if you want Dependabot to create
+    # pull requests for major updates only after review.
+    # commit-message:
+    #   prefix: "deps"
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    labels:
+      - 'ci'
+# registries: # Add entries here only if you use private registries
+#  my-private-registry:
+#    type: "npm-registry"
+#    url: "https://npm.pkg.github.com"
+#    username: "${{secrets.MY_REGISTRY_USERNAME}}"
+#    password: "${{secrets.MY_REGISTRY_PASSWORD}}"
