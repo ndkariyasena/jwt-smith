@@ -101,5 +101,8 @@
 	"tickets": {
 		"url": "https://github.com/users/ndkariyasena/projects/6"
 	},
-	"homepage": "https://jwt-smith.ndkariyasena.com"
+	"homepage": "https://jwt-smith.ndkariyasena.com",
+	"publishConfig": {
+		"registry": "https://npm.pkg.github.com"
+	}
 }
