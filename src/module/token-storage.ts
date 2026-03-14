@@ -11,9 +11,7 @@ export default class DefaultTokenStorage implements TokenStorage {
 
 	async saveOrUpdateToken(userId: string, tokenOrRefreshToken: string, token?: string): Promise<void> {
 		const existingData = this.tokens.get(userId) || { refreshTokens: [], tokens: [] };
-		let update: tokenEntity = { refreshTokens: [] };
-
-		update = {
+		let update: tokenEntity = {
 			...existingData,
 			refreshTokens: [...(existingData.refreshTokens || []), tokenOrRefreshToken],
 		};
