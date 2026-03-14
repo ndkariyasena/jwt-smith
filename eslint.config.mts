@@ -1,4 +1,3 @@
-import js from '@eslint/js';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 import json from '@eslint/json';
@@ -13,8 +12,6 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export default defineConfig([
 	{
 		files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
-		plugins: { js },
-		extends: ['js/recommended'],
 		languageOptions: { globals: globals.browser },
 	},
 	{
@@ -25,8 +22,20 @@ export default defineConfig([
 			},
 		},
 	},
-	tseslint.configs.recommended,
-	{ files: ['**/*.jsonc'], plugins: { json }, language: 'json/jsonc', extends: ['json/recommended'] },
-	{ files: ['**/*.md'], plugins: { markdown }, language: 'markdown/gfm', extends: ['markdown/recommended'] },
-	{ files: ['**/*.css'], plugins: { css }, language: 'css/css', extends: ['css/recommended'] },
+	[...tseslint.configs.recommended],
+	{
+		files: ['**/*.jsonc'],
+		language: 'json/jsonc',
+	},
+	json.configs.recommended,
+	{
+		files: ['**/*.md'],
+		language: 'markdown/gfm',
+	},
+	[...markdown.configs.recommended],
+	{
+		files: ['**/*.css'],
+		language: 'css/css',
+	},
+	css.configs.recommended,
 ]);

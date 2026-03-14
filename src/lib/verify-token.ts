@@ -1,4 +1,4 @@
-import jsonwebtoken from 'jsonwebtoken';
+import jsonwebtoken, { VerifyOptions } from 'jsonwebtoken';
 import Joi from 'joi';
 import { log, logFormat } from './logger';
 
@@ -85,7 +85,7 @@ export const verify = (parameters: VerifyTokenParams): Promise<VerifyResponse> =
 		}
 
 		const { token, secret, options = {} } = value;
-		const verifyOptions = { ...defaultVerifyOptions, options };
+		const verifyOptions: VerifyOptions = { ...defaultVerifyOptions, ...options };
 
 		jsonwebtoken.verify(token, secret, verifyOptions, (err, decoded) => {
 			if (err) {
