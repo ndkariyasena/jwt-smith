@@ -11,7 +11,7 @@ on:
 
 jobs:
   lint-n-build:
-    name: Linter and Builder
+    name: Linter and Builder (${{ matrix.node-version }})
     runs-on: ubuntu-latest
 
     strategy:

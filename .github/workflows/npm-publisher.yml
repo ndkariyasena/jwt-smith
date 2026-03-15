@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   check-requirements:
-    name: Check basic requirements
+    name: Check basic requirements (${{ matrix.node-version }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
