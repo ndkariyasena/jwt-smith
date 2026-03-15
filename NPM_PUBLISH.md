@@ -38,9 +38,10 @@ The `package.json` must include:
 - `keywords`: Relevant keywords for discoverability
 - `author`: Author information
 - `license`: Valid license
-- `repository`: GitHub repository URL
+- `repository`: GitHub repository URL (use `git+https://` format)
 - `bugs`: Issues URL
 - `homepage`: Project homepage
+- Publishes to npmjs.org (no `publishConfig` needed for unscoped packages)
 
 ### 4. Changesets Configuration
 
@@ -108,8 +109,8 @@ git push origin main
 
 - Builds the package (`npm run build`)
 - Copies `CHANGELOG.md` to `dist/`
-- Publishes to npm registry
-- Uses `--access=restricted` for scoped packages (detected by `@` prefix)
+- Publishes to npmjs.org registry (default for unscoped packages)
+- Uses `NPM_TOKEN` for authentication
 
 ## Good Practices
 
@@ -168,7 +169,7 @@ npx changeset add
 
 ### Publishing Fails
 
-**Cause**: npm token issues or package configuration
+**Cause**: npm token issues, package configuration, or wrong registry
 
 **Solution**:
 
@@ -176,6 +177,7 @@ npx changeset add
 - Check package.json for required fields
 - Ensure version is not already published
 - Verify `files` array includes built assets
+- Confirm no `publishConfig` forcing wrong registry (should publish to npmjs.org)
 
 ### Permission Issues
 
