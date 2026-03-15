@@ -1,11 +1,3 @@
-# jwt-smith
-
-## 1.1.1
-
-### Patch Changes
-
-- 2db1695: npm package version update and nodejs support version change
-
 ## 1.0.1
 
 ### Patch Changes

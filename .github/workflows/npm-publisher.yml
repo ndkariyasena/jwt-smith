@@ -128,6 +128,9 @@ jobs:
       - name: Build project
         run: npm run build && cp CHANGELOG.md dist/
 
+      - name: Authenticate to GitHub Package Registry
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GH_PAT }}" > ~/.npmrc
+
       - name: Publish package to npm
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
