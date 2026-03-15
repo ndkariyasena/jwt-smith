@@ -1,11 +1,16 @@
 # jwt-smith
 
+## 1.1.1
+
+### Patch Changes
+
+- 2db1695: npm package version update and nodejs support version change
+
 ## 1.0.1
 
 ### Patch Changes
 
 - 73e95d9: Changelog - Version 1.0.1
-
   - Debug logs have been added in the middleware functions.
 
 ## 1.0.0
@@ -13,7 +18,6 @@
 ### Major Changes
 
 - c1ea438: Changelog - Version 1.0.0
-
   - Initial release of JWT Smith
   - Added JwtManager for centralized configuration management
   - Implemented sign and verify methods for JWT handling
