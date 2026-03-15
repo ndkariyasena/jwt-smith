@@ -1,3 +1,9 @@
+## 1.0.2
+
+### Patch Changes
+
+- def5854: dependancy update and nodejs version support changes
+
 ## 1.0.1
 
 ### Patch Changes
