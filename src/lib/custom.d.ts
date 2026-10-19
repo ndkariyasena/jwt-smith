@@ -23,8 +23,13 @@ export type Algorithm =
 	| 'ES512'
 	| 'PS256'
 	| 'PS384'
-	| 'PS512'
-	| 'none';
+	| 'PS512';
+
+/**
+ * ⚠️ SECURITY: The 'none' algorithm is NOT included.
+ * Using algorithm 'none' bypasses signature validation and allows complete authentication bypass.
+ * Never set algorithm to 'none' in production.
+ */
 
 export type PrivateKey = PrivateKeyInput | string | Buffer | JsonWebKeyInput;
 

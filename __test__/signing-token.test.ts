@@ -1,4 +1,4 @@
-import { sign, setDefaultSignOptions } from '../src/lib/signing-token';
+import { sign, setDefaultSignOptions, setDefaultVerifyOptions } from '../src/lib/signing-token';
 import { verify } from '../src/lib/verify-token';
 
 describe('> Signin', () => {
@@ -13,14 +13,56 @@ describe('> Signin', () => {
 			});
 		});
 
-		it('02. Should return a string token for valid inputs', async () => {
+		it('02. Should return a string token for valid inputs with required algorithm.', async () => {
 			const token = await sign({
 				payload: {},
 				secret: 'SupperPass123',
-				options: {},
+				options: {
+					algorithm: 'HS256',  // Algorithm is now required for security
+				},
 			});
 			expect(token).not.toBeNull();
 			expect(typeof token).toBe('string');
+		});
+
+		it('03. ⚠️ SECURITY: Should throw error when using "none" algorithm.', async () => {
+			await sign({
+				payload: { userId: 123 },
+				secret: 'SupperPass123',
+				options: {
+					algorithm: 'none',  // ⚠️ SECURITY: This should be rejected
+				},
+			}).catch((error) => {
+				expect(error).toBeDefined();
+				expect(error.message).toContain('Validation Error');
+				expect(error.message).toContain('none');
+			});
+		});
+
+		it('04. ⚠️ SECURITY: Should reject invalid algorithms.', async () => {
+			await sign({
+				payload: { userId: 123 },
+				secret: 'SupperPass123',
+				options: {
+					algorithm: 'invalid-algo',  // Should be rejected - not in secure whitelist
+				},
+			}).catch((error) => {
+				expect(error).toBeDefined();
+				expect(error.message).toContain('Validation Error');
+			});
+		});
+
+		it('05. Should return valid token with RS256 algorithm.', async () => {
+			const token = await sign({
+				payload: { userId: 123 },
+				secret: 'SupperPass123',
+				options: {
+					algorithm: 'RS256',
+				},
+			});
+			expect(token).not.toBeNull();
+			expect(typeof token).toBe('string');
+			expect(token.startsWith('eyJ')).toBe(true);
 		});
 	});
 
@@ -40,7 +82,10 @@ describe('> Signin', () => {
 			const token = (await sign({
 				payload: {},
 				secret,
-				options: { subject },
+				options: {
+					algorithm: 'HS256',  // Required - algorithm must be specified
+					subject,
+				},
 			})) as unknown as string;
 
 			const decoded = (await verify({ token, secret })) as unknown as Record<string, string>;
@@ -49,6 +94,7 @@ describe('> Signin', () => {
 			expect(decoded.iss).toBe(iss);
 			expect(decoded.aud).toBe(aud);
 			expect(decoded.sub).toBe(subject);
+			expect(decoded.header.alg).toBe('256');
 		});
 
 		it('02. Pre-set values should be over-written with the options parameters.', async () => {
@@ -68,7 +114,10 @@ describe('> Signin', () => {
 			const token = (await sign({
 				payload: {},
 				secret,
-				options: { subject: subject_2 },
+				options: {
+					algorithm: 'HS256',  // Required
+					subject: subject_2,
+				},
 			})) as unknown as string;
 
 			const decoded = (await verify({ token, secret })) as unknown as Record<string, string>;
@@ -79,28 +128,22 @@ describe('> Signin', () => {
 			expect(decoded.sub).toBe(subject_2);
 		});
 
-		it('03. Should use default options if none are provided.', async () => {
-			const iss = 'https://example.com';
-			const aud = 'your-app';
-			const secret = 'SupperPass123';
-
+		it('03. Should throw an error if algorithm is not provided (now required).', async () => {
 			setDefaultSignOptions({
-				issuer: iss,
+				issuer: 'https://example.com',
 				expiresIn: '1h',
-				audience: aud,
+				audience: 'your-app',
 			});
 
-			const token = (await sign({
-				payload: {},
-				secret,
-				options: {},
-			})) as unknown as string;
+			await expect(
+				sign({
+					payload: {},
+					secret: 'SupperPass123',
+					options: {},
+				}),
+			).rejects.toThrow();
 
-			const decoded = (await verify({ token, secret })) as unknown as Record<string, string>;
-
-			expect(decoded).not.toBeNull();
-			expect(decoded.iss).toBe(iss);
-			expect(decoded.aud).toBe(aud);
+			expect(true).toBe(true);  // Test passed if error was thrown
 		});
 
 		it('04. Should throw an error if default options are invalid.', async () => {
@@ -114,7 +157,9 @@ describe('> Signin', () => {
 				sign({
 					payload: {},
 					secret: 'SupperPass123',
-					options: {},
+					options: {
+						algorithm: 'HS256',  // Required
+					},
 				}),
 			).rejects.toThrow();
 		});

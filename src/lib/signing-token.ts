@@ -18,8 +18,16 @@ interface SignTokenParams {
 	options?: SignTokenOptions;
 }
 
+/**
+ * ⚠️ SECURITY: The 'none' algorithm is EXPLICITLY REJECTED.
+ * Using algorithm 'none' bypasses signature validation and allows complete authentication bypass.
+ * Only secure algorithms (HS256, RS256, etc.) are allowed.
+ */
 const signTokenOptionsSchema = Joi.object<SignTokenOptions>({
-	algorithm: Joi.string<Algorithm>().default('HS256'),
+	algorithm: Joi.string<Algorithm>()
+		.default('HS256')
+		.invalid('none')  // ⚠️ SECURITY: Explicitly reject 'none' algorithm
+		.required(),  // ⚠️ SECURITY: Algorithm must be specified
 	keyid: Joi.string(),
 	expiresIn: Joi.alternatives().try(Joi.string(), Joi.number()),
 	notBefore: Joi.alternatives().try(Joi.string(), Joi.number()),

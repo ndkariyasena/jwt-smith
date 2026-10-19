@@ -18,8 +18,26 @@ interface VerifyTokenParams {
 	options?: VerifyTokenOptions;
 }
 
+/**
+ * ⚠️ SECURITY: Only secure algorithms are allowed!
+ * Using algorithm 'none' or any invalid algorithm bypasses signature verification
+ * and allows complete authentication bypass. The following algorithms are whitelisted:
+ * - HS256, HS384, HS512: HMAC-based (suitable for shared secrets)
+ * - RS256, RS384, RS512: RSA-based (suitable for RSA key pairs)
+ * - ES256, ES384, ES512: ECDSA-based (suitable for ECDSA key pairs)
+ * - PS256, PS384, PS512: RSA-PSS-based (suitable for RSA-PSS key pairs)
+ *
+ * Algorithms 'none' or any custom string will cause verification to fail.
+ */
+const SECURE_ALGORITHMS = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512'] as const;
+
 const verifyTokenOptionsSchema = Joi.object<VerifyTokenOptions>({
-	algorithms: Joi.array().items(Joi.string()),
+	// ⚠️ SECURITY: MUST specify at least one secure algorithm
+	// Using 'none' or any unlisted algorithm bypasses signature verification
+	algorithms: Joi.alternatives()
+		.try(Joi.array().items(Joi.string().valid(...SECURE_ALGORITHMS)).min(1))
+		.or(Joi.string().valid(...SECURE_ALGORITHMS))
+		.required(),
 	audience: Joi.alternatives().try(Joi.string(), Joi.array().items(Joi.string())),
 	clockTimestamp: Joi.number(),
 	clockTolerance: Joi.number(),
@@ -118,4 +136,21 @@ export const setDefaultVerifyOptions = (options: VerifyTokenOptions): void => {
 	}
 
 	defaultVerifyOptions = value;
+
+	// ⚠️ SECURITY: Additional runtime check for insecure algorithms
+	const SECURE_ALGORITHMS = ['HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512'] as const;
+
+	if (options.algorithms) {
+		const invalidAlgorithms = options.algorithms.filter(
+			alg => !SECURE_ALGORITHMS.includes(alg)
+		) as string[];
+
+		if (invalidAlgorithms.length > 0) {
+			throw new Error(
+				logFormat(`SECURITY ALERT: Invalid algorithms detected: ${invalidAlgorithms.join(', ')}. ` +
+				`Only the following secure algorithms are allowed: ${SECURE_ALGORITHMS.join(', ')}. ` +
+				`Using 'none' or invalid algorithms bypasses signature verification and allows complete authentication bypass.`)
+			);
+		}
+	}
 };
